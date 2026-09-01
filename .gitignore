@@ -1,0 +1,16 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+src-tauri/target
+src-tauri/gen
+*.log
+
+# Scratch and dead code, kept locally but never shipped
+_to_delete/
+
+# Build output
+artifacts/

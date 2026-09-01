@@ -1,0 +1,132 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to build (e.g. v0.1.0)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: ${{ matrix.label }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Windows x64
+            target: x86_64-pc-windows-msvc
+            arch: x64
+          - label: Windows ARM64
+            target: aarch64-pc-windows-msvc
+            arch: arm64
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: ${{ matrix.target }}
+
+      - run: npm ci
+
+      - name: Build installer
+        run: npm run tauri build -- --target ${{ matrix.target }}
+
+      # Both architectures produce a file named `*_x64-setup.exe` inside their
+      # own target directory, so they are renamed before they meet in one
+      # release and one silently overwrites the other.
+      - name: Collect artifacts
+        shell: pwsh
+        run: |
+          $version = "${{ github.event.inputs.tag || github.ref_name }}" -replace '^v', ''
+          $out = "artifacts"
+          New-Item -ItemType Directory -Force $out | Out-Null
+
+          $setup = Get-ChildItem -Recurse -Filter "*-setup.exe" `
+            -Path "src-tauri/target/${{ matrix.target }}/release/bundle" |
+            Select-Object -First 1
+          if (-not $setup) { throw "no installer was produced" }
+
+          $name = "Ampello_${version}_${{ matrix.arch }}-setup.exe"
+          Copy-Item $setup.FullName (Join-Path $out $name)
+
+          # A portable copy for anyone who would rather not run an installer.
+          $exe = "src-tauri/target/${{ matrix.target }}/release/ampello.exe"
+          if (Test-Path $exe) {
+            Copy-Item $exe (Join-Path $out "Ampello_${version}_${{ matrix.arch }}-portable.exe")
+          }
+
+          # Checksums, because the binaries are unsigned and SmartScreen will
+          # warn: this is the only way for someone to verify what they ran.
+          Get-ChildItem $out -Filter *.exe | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
+            "$hash  $($_.Name)" | Out-File -Append -Encoding ascii (Join-Path $out "SHA256SUMS.txt")
+          }
+          Get-ChildItem $out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ampello-${{ matrix.arch }}
+          path: artifacts/*
+
+  release:
+    name: Publish
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Combine checksums
+        run: |
+          cd dist
+          cat SHA256SUMS.txt | sort -k2 > SHA256SUMS && rm SHA256SUMS.txt
+          ls -la
+
+      # Left as a draft on purpose: a human writes the notes and decides when
+      # an unsigned binary goes out.
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          draft: true
+          generate_release_notes: true
+          files: dist/*
+          body: |
+            ## Install
+
+            Download the installer for your architecture and run it. It will ask
+            whether to install just for you or for all users on the machine.
+
+            | Architecture | File |
+            | --- | --- |
+            | x64 (most PCs) | `Ampello_*_x64-setup.exe` |
+            | ARM64 (Snapdragon, Surface Pro X) | `Ampello_*_arm64-setup.exe` |
+
+            A portable `.exe` is included for anyone who would rather not
+            install. It stores its library in the same place the installed
+            build does.
+
+            These binaries are **not code-signed**, so Windows SmartScreen will
+            warn on first run: choose *More info* → *Run anyway*, or build from
+            source. Verify against `SHA256SUMS` if you would rather check.

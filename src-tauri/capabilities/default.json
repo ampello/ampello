@@ -1,0 +1,15 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capabilities granted to Ampello's main window. Deliberately minimal: the interface can call Ampello's own commands and listen for its events, and nothing else. Ampello draws its own title bar, so the interface can drag, minimise, maximise and close the window - and nothing else. Showing and hiding are still decided in Rust.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:event:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-is-maximized",
+    "core:window:allow-close"
+  ]
+}

@@ -1,0 +1,318 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Ampello design tokens
+   ---------------------------------------------------------------------------
+   Every colour in the application comes from a semantic token defined here.
+   Components must never hard-code a hex value. Themes are swapped by changing
+   `data-theme` on <html>; because the Tailwind theme below is declared
+   `inline`, utilities resolve through the same custom properties at runtime.
+--------------------------------------------------------------------------- */
+
+/* One easing curve for the whole application, in both themes. */
+:root {
+  --ease-out: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --surface-2: #f1f1ef;
+  --surface-3: #e9e9e5;
+  --surface-inset: #fbfbfa;
+
+  --border: #e4e4e0;
+  --border-strong: #d2d2cc;
+
+  --text-primary: #1f1f1d;
+  --text-secondary: #6b6b66;
+  --text-muted: #9b9b95;
+  --text-inverted: #fbfbfa;
+
+  --accent: #6135e8;
+  --accent-hover: #5429d1;
+  --accent-active: #4922b4;
+  --accent-soft: #eeeafd;
+  --accent-soft-hover: #e2dbfb;
+  --accent-contrast: #ffffff;
+
+  --danger: #c2453a;
+  --danger-hover: #a83a30;
+  --danger-soft: #fbeceb;
+  --success: #2f7d55;
+  --success-soft: #eaf4ee;
+  --warning: #a9741a;
+  --warning-soft: #fbf2e3;
+
+  --overlay: rgba(28, 28, 26, 0.34);
+  --shadow-sm: 0 1px 2px rgba(24, 24, 22, 0.06);
+  --shadow-md: 0 2px 4px rgba(24, 24, 22, 0.05), 0 8px 20px rgba(24, 24, 22, 0.07);
+  --shadow-lg: 0 4px 8px rgba(24, 24, 22, 0.06), 0 20px 44px rgba(24, 24, 22, 0.12);
+
+  --selection: rgba(97, 53, 232, 0.18);
+
+  /* The close button keeps Windows' own convention rather than Ampello's
+     accent, because that is the one control everybody already knows. */
+  --titlebar-close: #c42b1c;
+  --titlebar-close-text: #ffffff;
+  --editor-gutter: #9b9b95;
+  --editor-active-line: rgba(97, 53, 232, 0.05);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #151514;
+  --surface: #1c1c1b;
+  --surface-2: #232322;
+  --surface-3: #2b2b29;
+  --surface-inset: #131312;
+
+  --border: #302f2d;
+  --border-strong: #403f3c;
+
+  --text-primary: #f3f3f1;
+  --text-secondary: #a5a59f;
+  --text-muted: #74746e;
+  --text-inverted: #17171a;
+
+  --accent: #9179f8;
+  --accent-hover: #a08cf9;
+  --accent-active: #b0a0fa;
+  --accent-soft: #241f4a;
+  --accent-soft-hover: #2c2757;
+  --accent-contrast: #141033;
+
+  --danger: #e0695c;
+  --danger-hover: #e87b6f;
+  --danger-soft: #38201d;
+  --success: #62b78a;
+  --success-soft: #1a2f24;
+  --warning: #d3a459;
+  --warning-soft: #33280f;
+
+  --overlay: rgba(0, 0, 0, 0.55);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.32), 0 8px 20px rgba(0, 0, 0, 0.34);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.34), 0 20px 44px rgba(0, 0, 0, 0.46);
+
+  --selection: rgba(145, 121, 248, 0.26);
+
+  --titlebar-close: #e81123;
+  --titlebar-close-text: #ffffff;
+  --editor-gutter: #64645f;
+  --editor-active-line: rgba(145, 121, 248, 0.06);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-inset: var(--surface-inset);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-inverted: var(--text-inverted);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-active: var(--accent-active);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-hover: var(--accent-soft-hover);
+  --color-accent-contrast: var(--accent-contrast);
+
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-danger-soft: var(--danger-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+
+  --color-titlebar-close: var(--titlebar-close);
+  --color-titlebar-close-text: var(--titlebar-close-text);
+
+  --font-sans: "Inter", "Segoe UI Variable Text", "Segoe UI", -apple-system,
+    BlinkMacSystemFont, system-ui, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Cascadia Code", "Cascadia Mono", ui-monospace, "SF Mono",
+    "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --shadow-token-sm: var(--shadow-sm);
+  --shadow-token-md: var(--shadow-md);
+  --shadow-token-lg: var(--shadow-lg);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-variant-numeric: tabular-nums;
+    overflow: hidden;
+  }
+
+  ::selection {
+    background-color: var(--selection);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  /* Ampello is a desktop app: no elastic overscroll, no text drag-select on chrome. */
+  button,
+  [role="button"],
+  label,
+  nav,
+  header {
+    user-select: none;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    user-select: text;
+  }
+
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border-strong);
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-muted);
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@layer utilities {
+  .surface-border {
+    border: 1px solid var(--border);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* ---------------------------------------------------------------------
+     Motion
+     ---------------------------------------------------------------------
+     One easing curve for everything that moves: quick to leave, slow to
+     settle. Nothing here lasts long enough to wait for - the point is that
+     things arrive rather than appear.
+  --------------------------------------------------------------------- */
+  .motion-fade {
+    animation: ampello-fade 150ms var(--ease-out) both;
+  }
+  .motion-rise {
+    animation: ampello-rise 220ms var(--ease-out) both;
+  }
+  .motion-pop {
+    animation: ampello-pop 140ms var(--ease-out) both;
+  }
+  .motion-toast {
+    animation: ampello-toast 240ms var(--ease-out) both;
+  }
+  .motion-row {
+    animation: ampello-fade 200ms var(--ease-out) both;
+  }
+}
+
+@keyframes ampello-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ampello-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ampello-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ampello-toast {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Everything is quick, and nothing moves if the OS says not to.
+   Windows: Settings > Accessibility > Visual effects > Animation effects.
+   With that off, every transition and animation below is switched off too -
+   which is the correct behaviour, and also the first thing to check when
+   Ampello appears to have no motion at all. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
