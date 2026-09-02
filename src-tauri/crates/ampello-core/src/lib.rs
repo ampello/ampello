@@ -9,8 +9,8 @@ pub mod models;
 #[cfg(test)]
 mod perf_tests;
 
-pub use db::settings::{Settings, SettingsPatch};
 pub use backup::{Backup, ImportMode, ImportReport};
+pub use db::settings::{Settings, SettingsPatch};
 pub use db::Database;
 pub use engine::{BoundaryMode, Engine, Expansion, Key, Trigger};
 pub use error::{Error, Result};

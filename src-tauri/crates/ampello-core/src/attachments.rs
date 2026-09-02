@@ -51,7 +51,10 @@ impl Store {
     pub fn add_file(&self, source: &Path) -> Result<Stored> {
         let metadata = std::fs::metadata(source)?;
         if !metadata.is_file() {
-            return Err(Error::invalid(format!("{} is not a file.", source.display())));
+            return Err(Error::invalid(format!(
+                "{} is not a file.",
+                source.display()
+            )));
         }
         check_size(metadata.len())?;
 
@@ -117,7 +120,9 @@ impl Store {
         let mut removed = 0usize;
 
         for shard in read_dir(&self.root)? {
-            let Ok(blobs) = read_dir(&shard) else { continue };
+            let Ok(blobs) = read_dir(&shard) else {
+                continue;
+            };
             for blob in blobs {
                 let Some(digest) = blob.file_name().map(|n| n.to_string_lossy().into_owned())
                 else {
@@ -157,7 +162,9 @@ impl Store {
             return 0;
         };
         for shard in shards {
-            let Ok(blobs) = read_dir(&shard) else { continue };
+            let Ok(blobs) = read_dir(&shard) else {
+                continue;
+            };
             for blob in blobs {
                 let Ok(files) = read_dir(&blob) else { continue };
                 for file in files {
@@ -225,11 +232,13 @@ pub fn sanitize_name(raw: &str) -> String {
 
 fn is_reserved_device(name: &str) -> bool {
     const RESERVED: &[&str] = &[
-        "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7",
-        "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+        "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8",
+        "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
     ];
     let stem = name.split('.').next().unwrap_or(name);
-    RESERVED.iter().any(|reserved| stem.eq_ignore_ascii_case(reserved))
+    RESERVED
+        .iter()
+        .any(|reserved| stem.eq_ignore_ascii_case(reserved))
 }
 
 fn truncate_keeping_extension(name: &str) -> String {

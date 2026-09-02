@@ -3,10 +3,10 @@ use ampello_core::attachments;
 use ampello_core::backup;
 use ampello_core::db;
 use ampello_core::db::now_ms;
-use ampello_core::Error;
 use ampello_core::models::{
     Category, DatabaseInfo, NewSnippet, Snippet, SnippetPatch, SnippetSummary,
 };
+use ampello_core::Error;
 use ampello_core::{Result, Settings, SettingsPatch};
 
 use crate::input::EngineStatus;
@@ -59,7 +59,9 @@ pub fn update_snippet(
     id: String,
     patch: SnippetPatch,
 ) -> Result<Snippet> {
-    let updated = state.db.with(|conn| db::snippets::update(conn, &id, patch))?;
+    let updated = state
+        .db
+        .with(|conn| db::snippets::update(conn, &id, patch))?;
     state.input.refresh();
     Ok(with_presence(&state, updated))
 }
@@ -96,7 +98,9 @@ pub fn create_category(state: State<'_, AppState>, name: String) -> Result<Categ
 
 #[tauri::command]
 pub fn rename_category(state: State<'_, AppState>, id: String, name: String) -> Result<Category> {
-    state.db.with(|conn| db::categories::rename(conn, &id, &name))
+    state
+        .db
+        .with(|conn| db::categories::rename(conn, &id, &name))
 }
 
 #[tauri::command]
@@ -200,7 +204,10 @@ pub fn export_backup(
     if attachments > 0 {
         let missing = backup::write_archive(&path, &backup, &state.db.attachments())?;
         if !missing.is_empty() {
-            log::warn!("some attachments could not be exported: {}", missing.join("; "));
+            log::warn!(
+                "some attachments could not be exported: {}",
+                missing.join("; ")
+            );
         }
     } else {
         let text = if yaml {
@@ -236,7 +243,6 @@ pub fn import_backup(
         .dialog()
         .file()
         .set_title("Import snippets")
-
         .add_filter(
             "Ampello backup",
             &["ampellozip", "replazip", "zip", "yaml", "yml", "json"],
@@ -262,7 +268,9 @@ pub fn import_backup(
         (backup::parse(&text)?, Vec::new())
     };
 
-    let mut report = state.db.with(|conn| backup::import(conn, &parsed, mode, &store))?;
+    let mut report = state
+        .db
+        .with(|conn| backup::import(conn, &parsed, mode, &store))?;
     report.problems.append(&mut file_problems);
 
     state.input.refresh();
@@ -444,10 +452,7 @@ fn collect_garbage(state: &AppState) {
 }
 
 #[tauri::command]
-pub fn attachment_bytes(
-    state: State<'_, AppState>,
-    id: String,
-) -> Result<tauri::ipc::Response> {
+pub fn attachment_bytes(state: State<'_, AppState>, id: String) -> Result<tauri::ipc::Response> {
     let attachment = state.db.with(|conn| db::attachments::get(conn, &id))?;
 
     if !attachments::is_previewable(&attachment.mime) {
@@ -495,10 +500,7 @@ pub fn library_info(state: State<'_, AppState>) -> LibraryInfo {
 /// expansion engine would mean rebuilding every part of the application that
 /// holds a handle to it.
 #[tauri::command]
-pub fn choose_shared_library(
-    app: AppHandle,
-    state: State<'_, AppState>,
-) -> Result<Option<String>> {
+pub fn choose_shared_library(app: AppHandle, state: State<'_, AppState>) -> Result<Option<String>> {
     use tauri_plugin_dialog::DialogExt;
 
     let start = if state.library.shared {

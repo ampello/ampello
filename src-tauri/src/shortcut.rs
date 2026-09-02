@@ -17,9 +17,15 @@ pub fn apply(app: &AppHandle, settings: &Settings) -> Option<String> {
     let window_accelerator = settings.global_shortcut.trim().to_string();
     if let Some(shortcut) = parse(&window_accelerator, &mut problems) {
         let handle = app.clone();
-        register(app, shortcut, &window_accelerator, &mut problems, move || {
-            window::toggle(&handle);
-        });
+        register(
+            app,
+            shortcut,
+            &window_accelerator,
+            &mut problems,
+            move || {
+                window::toggle(&handle);
+            },
+        );
     }
 
     let clipboard_accelerator = settings.clipboard_shortcut.trim().to_string();

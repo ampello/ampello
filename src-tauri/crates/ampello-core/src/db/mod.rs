@@ -112,8 +112,7 @@ impl Database {
                 conn.query_row("SELECT COUNT(*) FROM snippets", [], |r| r.get(0))?;
             let category_count: i64 =
                 conn.query_row("SELECT COUNT(*) FROM categories", [], |r| r.get(0))?;
-            let schema_version: i64 =
-                conn.query_row("PRAGMA user_version", [], |r| r.get(0))?;
+            let schema_version: i64 = conn.query_row("PRAGMA user_version", [], |r| r.get(0))?;
             let page_count: i64 = conn.query_row("PRAGMA page_count", [], |r| r.get(0))?;
             let page_size: i64 = conn.query_row("PRAGMA page_size", [], |r| r.get(0))?;
             Ok(DatabaseInfo {

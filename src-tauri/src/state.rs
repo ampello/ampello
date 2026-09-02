@@ -2,8 +2,8 @@
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 
-use parking_lot::Mutex;
 use ampello_core::Database;
+use parking_lot::Mutex;
 
 use crate::input::InputService;
 use crate::library::Resolved;

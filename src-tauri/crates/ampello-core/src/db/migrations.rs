@@ -4,7 +4,6 @@ use rusqlite::Connection;
 
 // Ordered and append-only. Never edit a migration that has shipped; add another.
 const MIGRATIONS: &[&str] = &[
-
     r#"
     CREATE TABLE categories (
         id          TEXT PRIMARY KEY,
@@ -36,16 +35,13 @@ const MIGRATIONS: &[&str] = &[
         value TEXT NOT NULL
     );
     "#,
-
     r#"
     ALTER TABLE snippets ADD COLUMN last_used_at INTEGER;
     CREATE INDEX idx_snippets_last_used ON snippets(last_used_at DESC);
     "#,
-
     r#"
     ALTER TABLE snippets DROP COLUMN title;
     "#,
-
     r#"
     CREATE TABLE attachments (
         id          TEXT PRIMARY KEY,
@@ -81,7 +77,9 @@ pub fn apply(conn: &Connection) -> Result<()> {
         if version <= current {
             continue;
         }
-        conn.execute_batch(&format!("BEGIN; {sql} PRAGMA user_version = {version}; COMMIT;"))?;
+        conn.execute_batch(&format!(
+            "BEGIN; {sql} PRAGMA user_version = {version}; COMMIT;"
+        ))?;
         log::info!("applied database migration {version}");
     }
     Ok(())

@@ -9,7 +9,9 @@ use windows_sys::Win32::System::DataExchange::{
     CloseClipboard, EmptyClipboard, EnumClipboardFormats, GetClipboardData, OpenClipboard,
     RegisterClipboardFormatW, SetClipboardData,
 };
-use windows_sys::Win32::System::Memory::{GlobalAlloc, GlobalLock, GlobalSize, GlobalUnlock, GMEM_MOVEABLE};
+use windows_sys::Win32::System::Memory::{
+    GlobalAlloc, GlobalLock, GlobalSize, GlobalUnlock, GMEM_MOVEABLE,
+};
 
 const CF_UNICODETEXT: u32 = 13;
 const CF_HDROP: u32 = 15;
@@ -114,8 +116,7 @@ pub fn restore(snapshot: &Snapshot) -> Result<(), String> {
 pub fn set_text(text: &str) -> Result<(), String> {
     let mut units: Vec<u16> = text.encode_utf16().collect();
     units.push(0);
-    let bytes =
-        unsafe { std::slice::from_raw_parts(units.as_ptr() as *const u8, units.len() * 2) };
+    let bytes = unsafe { std::slice::from_raw_parts(units.as_ptr() as *const u8, units.len() * 2) };
 
     let _session = Session::open()?;
     unsafe { EmptyClipboard() };
@@ -209,7 +210,10 @@ pub fn get_text() -> Result<Option<String>, String> {
             return Err("The clipboard's text could not be read.".into());
         }
         let units = std::slice::from_raw_parts(pointer, size / 2);
-        let end = units.iter().position(|unit| *unit == 0).unwrap_or(units.len());
+        let end = units
+            .iter()
+            .position(|unit| *unit == 0)
+            .unwrap_or(units.len());
         let text = String::from_utf16_lossy(&units[..end]);
         GlobalUnlock(handle as HGLOBAL);
         Ok(Some(text))

@@ -163,7 +163,9 @@ pub fn apply(conn: &Connection, patch: SettingsPatch) -> Result<Settings> {
     }
     if let Some(value) = patch.injection_mode.as_deref() {
         if !matches!(value, "auto" | "paste" | "type") {
-            return Err(Error::invalid("Injection mode must be auto, paste or type."));
+            return Err(Error::invalid(
+                "Injection mode must be auto, paste or type.",
+            ));
         }
         write_str(conn, INJECTION_MODE, value)?;
     }
@@ -207,9 +209,11 @@ pub fn apply(conn: &Connection, patch: SettingsPatch) -> Result<Settings> {
 
 fn read_str(conn: &Connection, key: &str) -> Result<Option<String>> {
     Ok(conn
-        .query_row("SELECT value FROM settings WHERE key = ?1", params![key], |r| {
-            r.get(0)
-        })
+        .query_row(
+            "SELECT value FROM settings WHERE key = ?1",
+            params![key],
+            |r| r.get(0),
+        )
         .optional()?)
 }
 

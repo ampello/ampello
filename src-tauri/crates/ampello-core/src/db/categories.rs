@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-use crate::models::Category;
 use super::{new_id, now_ms};
 use crate::error::{Error, Result};
+use crate::models::Category;
 use rusqlite::{params, Connection, OptionalExtension, Row};
 
 fn map(row: &Row<'_>) -> rusqlite::Result<Category> {

@@ -31,8 +31,14 @@ impl Drop for Temp {
 #[test]
 fn the_same_bytes_are_stored_once_however_often_they_are_added() {
     let temp = Temp::new("dedup");
-    let first = temp.store.add_bytes("invoice.pdf", b"%PDF-1.7 pretend").unwrap();
-    let second = temp.store.add_bytes("invoice.pdf", b"%PDF-1.7 pretend").unwrap();
+    let first = temp
+        .store
+        .add_bytes("invoice.pdf", b"%PDF-1.7 pretend")
+        .unwrap();
+    let second = temp
+        .store
+        .add_bytes("invoice.pdf", b"%PDF-1.7 pretend")
+        .unwrap();
 
     assert_eq!(first.digest, second.digest);
     assert_eq!(temp.store.size_bytes(), b"%PDF-1.7 pretend".len() as u64);
@@ -52,10 +58,16 @@ fn different_bytes_under_the_same_name_stay_separate() {
 #[test]
 fn the_stored_path_ends_in_the_real_filename() {
     let temp = Temp::new("name");
-    let stored = temp.store.add_bytes("Q3 Report.docx", b"docx bytes").unwrap();
+    let stored = temp
+        .store
+        .add_bytes("Q3 Report.docx", b"docx bytes")
+        .unwrap();
     let path = temp.store.path_of(&stored.digest, &stored.name);
 
-    assert_eq!(path.file_name().unwrap().to_string_lossy(), "Q3 Report.docx");
+    assert_eq!(
+        path.file_name().unwrap().to_string_lossy(),
+        "Q3 Report.docx"
+    );
     assert!(path.is_file());
 }
 
@@ -71,7 +83,10 @@ fn any_kind_of_file_is_the_same_kind_of_thing() {
     ] {
         let stored = temp.store.add_bytes(name, bytes).unwrap();
         assert_eq!(stored.name, name);
-        assert_eq!(temp.store.read(&stored.digest, &stored.name).unwrap(), bytes);
+        assert_eq!(
+            temp.store.read(&stored.digest, &stored.name).unwrap(),
+            bytes
+        );
     }
 }
 

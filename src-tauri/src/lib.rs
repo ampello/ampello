@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pub mod autostart;
-pub mod library;
 pub mod commands;
 pub mod input;
+pub mod library;
 pub mod shortcut;
 pub mod state;
 pub mod tray;
@@ -26,7 +26,6 @@ pub const HIDDEN_FLAG: &str = "--hidden";
 
 pub fn run() {
     tauri::Builder::default()
-
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(log::LevelFilter::Info)
@@ -42,13 +41,11 @@ pub fn run() {
                 ))
                 .build(),
         )
-
         .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
             window::show(app);
         }))
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
-
             Some(vec![HIDDEN_FLAG]),
         ))
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
@@ -69,7 +66,11 @@ pub fn run() {
             let db_path = location.database_path();
             log::info!(
                 "opening {} library at {}",
-                if location.shared { "shared" } else { "personal" },
+                if location.shared {
+                    "shared"
+                } else {
+                    "personal"
+                },
                 db_path.display()
             );
 

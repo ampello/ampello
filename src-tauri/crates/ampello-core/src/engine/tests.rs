@@ -53,7 +53,11 @@ fn every_kind_of_terminator_fires() {
         let mut engine = engine_with(&[("email", ":email")]);
         let text = format!(":email{terminator}");
         let fired = type_text(&mut engine, &text);
-        assert_eq!(ids(&fired), ["email"], "terminator {terminator:?} should fire");
+        assert_eq!(
+            ids(&fired),
+            ["email"],
+            "terminator {terminator:?} should fire"
+        );
         assert_eq!(fired[0].terminator, terminator);
     }
 }
@@ -105,7 +109,11 @@ fn a_trigger_after_a_space_or_punctuation_fires() {
 fn a_word_trigger_is_still_protected_from_its_own_suffix() {
     let mut engine = engine_with(&[("sig", "sig"), ("mysig", "mysig")]);
     let fired = type_text(&mut engine, "mysig ");
-    assert_eq!(ids(&fired), ["mysig"], "the longer, boundary-respecting trigger wins");
+    assert_eq!(
+        ids(&fired),
+        ["mysig"],
+        "the longer, boundary-respecting trigger wins"
+    );
 }
 
 #[test]
@@ -164,14 +172,22 @@ fn a_reset_forgets_everything_before_it() {
 fn after_an_expansion_the_buffer_starts_clean() {
     let mut engine = engine_with(&[("email", ":email")]);
     let fired = type_text(&mut engine, ":email :email ");
-    assert_eq!(ids(&fired), ["email", "email"], "back-to-back expansions both fire");
+    assert_eq!(
+        ids(&fired),
+        ["email", "email"],
+        "back-to-back expansions both fire"
+    );
 }
 
 #[test]
 fn an_expansion_cannot_be_completed_by_leftover_trigger_text() {
     let mut engine = engine_with(&[("a", ":ab")]);
     type_text(&mut engine, ":ab ");
-    assert_eq!(engine.buffer_contents(), " ", "only the re-sent terminator remains");
+    assert_eq!(
+        engine.buffer_contents(),
+        " ",
+        "only the re-sent terminator remains"
+    );
 }
 
 #[test]

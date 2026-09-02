@@ -382,7 +382,11 @@ pub fn read_archive(
             continue;
         }
 
-        let name = entry_name.rsplit('/').next().unwrap_or_default().to_string();
+        let name = entry_name
+            .rsplit('/')
+            .next()
+            .unwrap_or_default()
+            .to_string();
         if let Err(error) = store.add_bytes(&name, &contents) {
             problems.push(format!("{name}: {error}"));
         }
@@ -445,7 +449,9 @@ pub fn import(
                         Some(created.id)
                     }
                     Err(error) => {
-                        report.problems.push(format!("Collection “{name}”: {error}"));
+                        report
+                            .problems
+                            .push(format!("Collection “{name}”: {error}"));
                         None
                     }
                 },
@@ -481,7 +487,9 @@ pub fn import(
                         }
 
                         if let Err(error) = clear_attachments(conn, &id) {
-                            report.problems.push(format!("\u{201c}{trigger}\u{201d}: {error}"));
+                            report
+                                .problems
+                                .push(format!("\u{201c}{trigger}\u{201d}: {error}"));
                         }
                         restore_attachments(conn, &id, snippet, store, &mut report);
                         report.replaced += 1;
@@ -512,11 +520,7 @@ pub fn import(
                             );
                         }
                         if snippet.usage_count > 0 {
-                            let _ = snippets::restore_usage(
-                                conn,
-                                &created.id,
-                                snippet.usage_count,
-                            );
+                            let _ = snippets::restore_usage(conn, &created.id, snippet.usage_count);
                         }
                         restore_attachments(conn, &created.id, snippet, store, &mut report);
                         report.added += 1;

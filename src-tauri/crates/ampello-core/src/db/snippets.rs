@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-use crate::models::*;
 use super::{new_id, now_ms};
 use crate::error::{Error, Result};
+use crate::models::*;
 use rusqlite::{params, Connection, OptionalExtension, Row};
 
 const MAX_TRIGGER_CHARS: usize = 64;
@@ -12,7 +12,9 @@ pub fn normalize_trigger(raw: &str) -> Result<String> {
         return Err(Error::invalid("A trigger cannot be empty."));
     }
     if trigger.chars().any(|c| c == '\n' || c == '\r' || c == '\t') {
-        return Err(Error::invalid("A trigger cannot contain line breaks or tabs."));
+        return Err(Error::invalid(
+            "A trigger cannot contain line breaks or tabs.",
+        ));
     }
     let len = trigger.chars().count();
     if len > MAX_TRIGGER_CHARS {
@@ -162,7 +164,11 @@ pub fn get(conn: &Connection, id: &str) -> Result<Snippet> {
     Ok(snippet)
 }
 
-pub fn trigger_available(conn: &Connection, trigger: &str, except_id: Option<&str>) -> Result<bool> {
+pub fn trigger_available(
+    conn: &Connection,
+    trigger: &str,
+    except_id: Option<&str>,
+) -> Result<bool> {
     let trigger = normalize_trigger(trigger)?;
     let existing: Option<String> = conn
         .query_row(
@@ -209,9 +215,7 @@ pub fn update(conn: &Connection, id: &str, patch: SnippetPatch) -> Result<Snippe
     let trigger = match patch.trigger.as_deref() {
         Some(raw) => {
             let normalized = normalize_trigger(raw)?;
-            if normalized != current.trigger
-                && !trigger_available(conn, &normalized, Some(id))?
-            {
+            if normalized != current.trigger && !trigger_available(conn, &normalized, Some(id))? {
                 return Err(Error::conflict(format!(
                     "Another snippet already uses the trigger \"{normalized}\"."
                 )));
@@ -275,9 +279,7 @@ pub fn restore_usage(conn: &Connection, id: &str, count: i64) -> Result<()> {
 }
 
 pub fn enabled_triggers(conn: &Connection) -> Result<Vec<(String, String)>> {
-    let mut stmt = conn.prepare(
-        r#"SELECT id, "trigger" FROM snippets WHERE enabled = 1"#,
-    )?;
+    let mut stmt = conn.prepare(r#"SELECT id, "trigger" FROM snippets WHERE enabled = 1"#)?;
     let rows = stmt.query_map([], |row| Ok((row.get(0)?, row.get(1)?)))?;
     let mut out = Vec::new();
     for row in rows {
@@ -306,9 +308,11 @@ pub fn record_usage(conn: &Connection, id: &str) -> Result<()> {
 
 fn ensure_category_exists(conn: &Connection, id: &str) -> Result<()> {
     let exists: Option<String> = conn
-        .query_row("SELECT id FROM categories WHERE id = ?1", params![id], |r| {
-            r.get(0)
-        })
+        .query_row(
+            "SELECT id FROM categories WHERE id = ?1",
+            params![id],
+            |r| r.get(0),
+        )
         .optional()?;
     exists
         .map(|_| ())

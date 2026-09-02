@@ -16,10 +16,10 @@ use windows_sys::Win32::UI::WindowsAndMessaging::{
     GetForegroundWindow, GetGUIThreadInfo, GUITHREADINFO,
 };
 
+use super::clipboard;
 use super::Config;
 use super::InjectionMode;
 use super::TypingSpeed;
-use super::clipboard;
 
 // Stamped on every event we send so our own hook can ignore it.
 // Without this, injected backspaces and pastes feed back into the matcher.
@@ -207,9 +207,7 @@ impl Guard {
             watcher,
             started: Instant::now(),
             sent: Cell::new(0),
-            interval: Duration::from_nanos(
-                1_000_000_000 / speed.events_per_second().max(1) as u64,
-            ),
+            interval: Duration::from_nanos(1_000_000_000 / speed.events_per_second().max(1) as u64),
             next: Cell::new(None),
         }
     }
@@ -249,8 +247,7 @@ impl Guard {
 
         if self.focus != 0 && focus != 0 && focus != self.focus {
             return Err(
-                "the caret moved to a different field part-way through, so Ampello stopped"
-                    .into(),
+                "the caret moved to a different field part-way through, so Ampello stopped".into(),
             );
         }
         Ok(())
@@ -281,8 +278,13 @@ impl Drop for Guard {
 }
 
 fn send_batch(chunk: &[INPUT]) -> Result<(), String> {
-    let sent =
-        unsafe { SendInput(chunk.len() as u32, chunk.as_ptr(), size_of::<INPUT>() as i32) };
+    let sent = unsafe {
+        SendInput(
+            chunk.len() as u32,
+            chunk.as_ptr(),
+            size_of::<INPUT>() as i32,
+        )
+    };
     INJECTED_SENT.fetch_add(sent as u64, Ordering::Release);
     if sent as usize != chunk.len() {
         return Err("Windows blocked Ampello from sending input to this window.".into());
@@ -335,7 +337,14 @@ fn send(inputs: &[INPUT], guard: &Guard) -> Result<(), String> {
 
 pub fn release_modifiers() -> Result<(), String> {
     let events: Vec<INPUT> = [
-        VK_SHIFT, VK_LSHIFT, VK_RSHIFT, VK_CONTROL, VK_LCONTROL, VK_RCONTROL, VK_MENU, VK_LMENU,
+        VK_SHIFT,
+        VK_LSHIFT,
+        VK_RSHIFT,
+        VK_CONTROL,
+        VK_LCONTROL,
+        VK_RCONTROL,
+        VK_MENU,
+        VK_LMENU,
         VK_RMENU,
     ]
     .iter()

@@ -20,9 +20,9 @@ use windows_sys::Win32::UI::Input::KeyboardAndMouse::{
 };
 use windows_sys::Win32::UI::WindowsAndMessaging::{
     CallNextHookEx, GetForegroundWindow, GetMessageW, GetWindowThreadProcessId, PostThreadMessageW,
-    SetWindowsHookExW, UnhookWindowsHookEx, HHOOK, KBDLLHOOKSTRUCT, MSG,
-    WH_KEYBOARD_LL, WH_MOUSE_LL, WM_KEYDOWN, WM_KEYUP, WM_LBUTTONDOWN, WM_MBUTTONDOWN, WM_QUIT,
-    WM_RBUTTONDOWN, WM_SYSKEYDOWN, WM_SYSKEYUP,
+    SetWindowsHookExW, UnhookWindowsHookEx, HHOOK, KBDLLHOOKSTRUCT, MSG, WH_KEYBOARD_LL,
+    WH_MOUSE_LL, WM_KEYDOWN, WM_KEYUP, WM_LBUTTONDOWN, WM_MBUTTONDOWN, WM_QUIT, WM_RBUTTONDOWN,
+    WM_SYSKEYDOWN, WM_SYSKEYUP,
 };
 
 use ampello_core::db;
@@ -353,7 +353,12 @@ unsafe extern "system" fn keyboard_proc(code: i32, wparam: WPARAM, lparam: LPARA
 }
 
 unsafe extern "system" fn mouse_proc(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
-    if code >= 0 && matches!(wparam as u32, WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN) {
+    if code >= 0
+        && matches!(
+            wparam as u32,
+            WM_LBUTTONDOWN | WM_RBUTTONDOWN | WM_MBUTTONDOWN
+        )
+    {
         if let Some(shared) = SHARED.get() {
             let _ = catch_unwind(AssertUnwindSafe(|| shared.engine.lock().reset()));
         }
@@ -461,14 +466,7 @@ unsafe fn on_key(wparam: WPARAM, lparam: LPARAM) -> bool {
     }
 
     shared.injecting.store(true, Ordering::Release);
-    if shared
-        .jobs
-        .send(Job::Expand {
-            expansion,
-            window,
-        })
-        .is_err()
-    {
+    if shared.jobs.send(Job::Expand { expansion, window }).is_err() {
         shared.injecting.store(false, Ordering::Release);
         return false;
     }
@@ -536,10 +534,8 @@ fn worker(
         };
 
         let config = *shared.config.lock();
-        let outcome = catch_unwind(AssertUnwindSafe(|| {
-            expand(&db, &expansion, config, window)
-        }))
-        .unwrap_or_else(|_| Err("Ampello's injector panicked.".into()));
+        let outcome = catch_unwind(AssertUnwindSafe(|| expand(&db, &expansion, config, window)))
+            .unwrap_or_else(|_| Err("Ampello's injector panicked.".into()));
 
         shared.injecting.store(false, Ordering::Release);
 
@@ -552,11 +548,13 @@ fn worker(
             Err(error) if error == inject::CANCELLED => {
                 inject::finish_cancel();
                 log::info!("expansion of snippet {} cancelled", expansion.snippet_id);
-                *shared.last_error.lock() =
-                    Some("Stopped with Escape part-way through.".into());
+                *shared.last_error.lock() = Some("Stopped with Escape part-way through.".into());
             }
             Err(error) => {
-                log::warn!("expansion of snippet {} failed: {error}", expansion.snippet_id);
+                log::warn!(
+                    "expansion of snippet {} failed: {error}",
+                    expansion.snippet_id
+                );
                 *shared.last_error.lock() = Some(error);
             }
         }

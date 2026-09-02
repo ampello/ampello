@@ -43,7 +43,9 @@ mod tests {
 
     #[test]
     fn everything_else_terminates() {
-        for c in [' ', '\t', '\n', '.', ',', '!', ':', ';', '(', '-', '/', '\u{a0}'] {
+        for c in [
+            ' ', '\t', '\n', '.', ',', '!', ':', ';', '(', '-', '/', '\u{a0}',
+        ] {
             assert!(is_terminator(c), "{c:?} should terminate a trigger");
         }
     }

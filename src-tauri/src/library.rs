@@ -220,7 +220,10 @@ mod tests {
         set(&alice, Some(&shared)).unwrap();
         set(&bob, Some(&shared)).unwrap();
 
-        assert_eq!(resolve(&alice).database_path(), resolve(&bob).database_path());
+        assert_eq!(
+            resolve(&alice).database_path(),
+            resolve(&bob).database_path()
+        );
         // And each still keeps its own pointer, so either can leave alone.
         set(&bob, None).unwrap();
         assert!(resolve(&alice).shared);

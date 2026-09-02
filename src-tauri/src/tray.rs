@@ -46,7 +46,6 @@ pub fn create(app: &AppHandle, expansion_enabled: bool) -> tauri::Result<()> {
     let mut builder = TrayIconBuilder::with_id("ampello")
         .tooltip("Ampello")
         .menu(&menu)
-
         .show_menu_on_left_click(false)
         .on_menu_event(on_menu_event)
         .on_tray_icon_event(on_tray_icon_event);

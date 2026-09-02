@@ -78,7 +78,12 @@ fn a_library_survives_a_yaml_round_trip() {
     let source = db();
     source
         .with(|conn| {
-            add(conn, ":email", "Hello,\n\nThank you for reaching out.\n", Some("Work"));
+            add(
+                conn,
+                ":email",
+                "Hello,\n\nThank you for reaching out.\n",
+                Some("Work"),
+            );
             add(
                 conn,
                 ":javarepo",
@@ -103,7 +108,10 @@ fn a_library_survives_a_yaml_round_trip() {
     let sig = after.snippets.iter().find(|s| s.trigger == ":sig").unwrap();
     assert_eq!(sig.usage_count, 2, "usage counts belong in a restore");
 
-    assert!(text.contains("content: |"), "expected block scalars:\n{text}");
+    assert!(
+        text.contains("content: |"),
+        "expected block scalars:\n{text}"
+    );
     assert!(text.contains("collection: \"Work\""));
 }
 
@@ -219,7 +227,11 @@ fn enabled_and_favorite_survive() {
 
     let (_, after, _) = round_trip(&source, true);
     let off = after.snippets.iter().find(|s| s.trigger == ":off").unwrap();
-    let star = after.snippets.iter().find(|s| s.trigger == ":star").unwrap();
+    let star = after
+        .snippets
+        .iter()
+        .find(|s| s.trigger == ":star")
+        .unwrap();
     assert!(!off.enabled, "a disabled snippet must import disabled");
     assert!(star.favorite, "a favourite must import as a favourite");
 }
@@ -334,7 +346,11 @@ snippets:
     assert!(report.problems.is_empty());
 
     let after = target.with(|conn| export(conn, 0)).unwrap();
-    let hello = after.snippets.iter().find(|s| s.trigger == ":hello").unwrap();
+    let hello = after
+        .snippets
+        .iter()
+        .find(|s| s.trigger == ":hello")
+        .unwrap();
     assert_eq!(hello.content, "Hello, how are you?\n");
 }
 
@@ -376,7 +392,11 @@ fn one_bad_row_does_not_abandon_the_rest() {
         .unwrap();
     assert_eq!(report.added, 1);
     assert_eq!(report.problems.len(), 1);
-    assert!(report.problems[0].contains("empty"), "{:?}", report.problems);
+    assert!(
+        report.problems[0].contains("empty"),
+        "{:?}",
+        report.problems
+    );
 }
 
 #[test]
@@ -596,7 +616,13 @@ fn one_file_on_two_snippets_is_stored_once_in_the_archive() {
                     category_id: None,
                 },
             )?;
-            attach(conn, &source.store, &snippet.id, "shared.pdf", b"the same bytes");
+            attach(
+                conn,
+                &source.store,
+                &snippet.id,
+                "shared.pdf",
+                b"the same bytes",
+            );
         }
         Ok(())
     })
@@ -650,7 +676,13 @@ fn an_archive_whose_contents_do_not_match_is_refused_not_written() {
                 category_id: None,
             },
         )?;
-        attach(conn, &source.store, &snippet.id, "real.pdf", b"the real contents");
+        attach(
+            conn,
+            &source.store,
+            &snippet.id,
+            "real.pdf",
+            b"the real contents",
+        );
         Ok(())
     })
     .unwrap();
@@ -664,7 +696,8 @@ fn an_archive_whose_contents_do_not_match_is_refused_not_written() {
         let mut zip = zip::ZipWriter::new(file);
         let options = zip::write::SimpleFileOptions::default();
         zip.start_file(ARCHIVE_ENTRY, options).unwrap();
-        zip.write_all(to_yaml(&exported).unwrap().as_bytes()).unwrap();
+        zip.write_all(to_yaml(&exported).unwrap().as_bytes())
+            .unwrap();
         zip.start_file(
             format!("attachments/{}/{}", declared.digest, declared.name),
             options,
@@ -674,8 +707,7 @@ fn an_archive_whose_contents_do_not_match_is_refused_not_written() {
         zip.finish().unwrap();
     }
 
-    let (_, problems) =
-        read_archive(&std::fs::read(&path).unwrap(), &destination.store).unwrap();
+    let (_, problems) = read_archive(&std::fs::read(&path).unwrap(), &destination.store).unwrap();
     assert_eq!(problems.len(), 1, "{problems:?}");
     assert!(problems[0].contains("do not match"), "{problems:?}");
     assert!(!destination.store.exists(&declared.digest, &declared.name));
@@ -711,7 +743,11 @@ fn a_restore_without_the_files_says_so_rather_than_dropping_them() {
 
     assert_eq!(report.added, 1);
     assert_eq!(report.problems.len(), 1, "{:?}", report.problems);
-    assert!(report.problems[0].contains("missing.pdf"), "{:?}", report.problems);
+    assert!(
+        report.problems[0].contains("missing.pdf"),
+        "{:?}",
+        report.problems
+    );
 
     let restored = to
         .with(|conn| {

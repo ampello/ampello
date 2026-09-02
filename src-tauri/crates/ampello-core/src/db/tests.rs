@@ -189,7 +189,10 @@ fn deleting_a_collection_keeps_its_snippets() {
         categories::delete(conn, &category.id)?;
 
         let after = snippets::get(conn, &snippet.id)?;
-        assert!(after.category_id.is_none(), "snippet must survive, uncategorised");
+        assert!(
+            after.category_id.is_none(),
+            "snippet must survive, uncategorised"
+        );
         assert_eq!(after.content, "class ItemRepository {}");
         Ok(())
     })
@@ -216,14 +219,20 @@ fn usage_count_increments() {
     db.with(|conn| {
         let created = snippets::create(conn, new(":u", "x"))?;
         assert_eq!(created.usage_count, 0);
-        assert!(created.last_used_at.is_none(), "a new snippet has never fired");
+        assert!(
+            created.last_used_at.is_none(),
+            "a new snippet has never fired"
+        );
 
         snippets::record_usage(conn, &created.id)?;
         snippets::record_usage(conn, &created.id)?;
 
         let after = snippets::get(conn, &created.id)?;
         assert_eq!(after.usage_count, 2);
-        assert!(after.last_used_at.is_some(), "using a snippet stamps last_used_at");
+        assert!(
+            after.last_used_at.is_some(),
+            "using a snippet stamps last_used_at"
+        );
 
         assert_eq!(after.updated_at, created.updated_at);
         Ok(())
@@ -434,7 +443,10 @@ fn a_healthy_database_reopens_with_its_contents() {
     }
 
     let db = Database::open(&path).unwrap();
-    assert!(db.recovered_from().is_none(), "a healthy file is not quarantined");
+    assert!(
+        db.recovered_from().is_none(),
+        "a healthy file is not quarantined"
+    );
     let rows = db.with(snippets::list_summaries).unwrap();
     assert_eq!(rows.len(), 1);
     assert_eq!(rows[0].trigger, ":kept");
@@ -521,7 +533,10 @@ fn attachments_keep_the_order_they_were_added_in() {
         let listed = attachments::list(conn, &snippet.id)?;
         let names: Vec<&str> = listed.iter().map(|a| a.name.as_str()).collect();
         assert_eq!(names, ["first.pdf", "second.png", "third.docx"]);
-        assert_eq!(listed.iter().map(|a| a.position).collect::<Vec<_>>(), [0, 1, 2]);
+        assert_eq!(
+            listed.iter().map(|a| a.position).collect::<Vec<_>>(),
+            [0, 1, 2]
+        );
         Ok(())
     })
     .unwrap();
@@ -583,7 +598,10 @@ fn deleting_an_attachment_closes_the_gap_it_leaves() {
             listed.iter().map(|a| a.name.as_str()).collect::<Vec<_>>(),
             ["a.pdf", "c.pdf"]
         );
-        assert_eq!(listed.iter().map(|a| a.position).collect::<Vec<_>>(), [0, 1]);
+        assert_eq!(
+            listed.iter().map(|a| a.position).collect::<Vec<_>>(),
+            [0, 1]
+        );
         Ok(())
     })
     .unwrap();
