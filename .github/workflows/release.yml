@@ -77,9 +77,12 @@ jobs:
 
           # Checksums, because the binaries are unsigned and SmartScreen will
           # warn: this is the only way for someone to verify what they ran.
+          # Named per architecture: both jobs upload into one directory, and a
+          # shared filename means one silently overwrites the other.
+          $sums = Join-Path $out "SHA256SUMS-${{ matrix.arch }}.txt"
           Get-ChildItem $out -Filter *.exe | ForEach-Object {
             $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
-            "$hash  $($_.Name)" | Out-File -Append -Encoding ascii (Join-Path $out "SHA256SUMS.txt")
+            "$hash  $($_.Name)" | Out-File -Append -Encoding ascii $sums
           }
           Get-ChildItem $out
 
@@ -101,8 +104,15 @@ jobs:
       - name: Combine checksums
         run: |
           cd dist
-          cat SHA256SUMS.txt | sort -k2 > SHA256SUMS && rm SHA256SUMS.txt
-          ls -la
+          cat SHA256SUMS-*.txt | sort -k2 > SHA256SUMS && rm SHA256SUMS-*.txt
+          echo "--- SHA256SUMS ---"; cat SHA256SUMS
+          # Every uploaded binary must appear, or the release ships unverifiable.
+          binaries=$(ls *.exe | wc -l)
+          listed=$(wc -l < SHA256SUMS)
+          if [ "$binaries" -ne "$listed" ]; then
+            echo "::error::$binaries binaries but $listed checksums"
+            exit 1
+          fi
 
       # Left as a draft on purpose: a human writes the notes and decides when
       # an unsigned binary goes out.
