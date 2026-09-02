@@ -94,7 +94,7 @@ fn toggle_expansion(app: &AppHandle) {
         return;
     };
 
-    let current = match state.db.with(db::settings::load) {
+    let current = match state.db().with(db::settings::load) {
         Ok(settings) => settings.expansion_enabled,
         Err(error) => {
             log::warn!("could not read settings from the tray: {error}");
@@ -103,7 +103,7 @@ fn toggle_expansion(app: &AppHandle) {
     };
     let next = !current;
 
-    let applied = state.db.with(|conn| {
+    let applied = state.db().with(|conn| {
         db::settings::apply(
             conn,
             SettingsPatch {

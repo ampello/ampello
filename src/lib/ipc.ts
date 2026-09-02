@@ -126,6 +126,4 @@ export const chooseSharedLibrary = () =>
 
 export const usePersonalLibrary = () => call<void>("use_personal_library");
 
-export const restartApp = () => call<void>("restart_app");
-
 export const diagnostics = () => call<Diagnostics>("diagnostics");

@@ -11,11 +11,11 @@ use ampello_core::{Result, Settings, SettingsPatch};
 
 use crate::input::EngineStatus;
 use crate::state::AppState;
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Emitter, State};
 
 #[tauri::command]
 pub fn get_settings(state: State<'_, AppState>) -> Result<Settings> {
-    state.db.with(db::settings::load)
+    state.db().with(db::settings::load)
 }
 
 #[tauri::command]
@@ -24,7 +24,7 @@ pub fn update_settings(
     state: State<'_, AppState>,
     patch: SettingsPatch,
 ) -> Result<Settings> {
-    let settings = state.db.with(|conn| db::settings::apply(conn, patch))?;
+    let settings = state.db().with(|conn| db::settings::apply(conn, patch))?;
     state.input.refresh();
     crate::apply_desktop_settings(&app, &settings);
     Ok(settings)
@@ -32,23 +32,25 @@ pub fn update_settings(
 
 #[tauri::command]
 pub fn list_snippets(state: State<'_, AppState>) -> Result<Vec<SnippetSummary>> {
-    state.db.with(db::snippets::list_summaries)
+    state.db().with(db::snippets::list_summaries)
 }
 
 #[tauri::command]
 pub fn search_snippets(state: State<'_, AppState>, query: String) -> Result<Vec<SnippetSummary>> {
-    state.db.with(|conn| db::snippets::search(conn, &query))
+    state.db().with(|conn| db::snippets::search(conn, &query))
 }
 
 #[tauri::command]
 pub fn get_snippet(state: State<'_, AppState>, id: String) -> Result<Snippet> {
-    let snippet = state.db.with(|conn| db::snippets::get(conn, &id))?;
+    let snippet = state.db().with(|conn| db::snippets::get(conn, &id))?;
     Ok(with_presence(&state, snippet))
 }
 
 #[tauri::command]
 pub fn create_snippet(state: State<'_, AppState>, snippet: NewSnippet) -> Result<Snippet> {
-    let created = state.db.with(|conn| db::snippets::create(conn, snippet))?;
+    let created = state
+        .db()
+        .with(|conn| db::snippets::create(conn, snippet))?;
     state.input.refresh();
     Ok(created)
 }
@@ -60,7 +62,7 @@ pub fn update_snippet(
     patch: SnippetPatch,
 ) -> Result<Snippet> {
     let updated = state
-        .db
+        .db()
         .with(|conn| db::snippets::update(conn, &id, patch))?;
     state.input.refresh();
     Ok(with_presence(&state, updated))
@@ -68,7 +70,7 @@ pub fn update_snippet(
 
 #[tauri::command]
 pub fn delete_snippet(state: State<'_, AppState>, id: String) -> Result<()> {
-    state.db.with(|conn| db::snippets::delete(conn, &id))?;
+    state.db().with(|conn| db::snippets::delete(conn, &id))?;
     state.input.refresh();
 
     collect_garbage(&state);
@@ -82,35 +84,35 @@ pub fn trigger_available(
     except_id: Option<String>,
 ) -> Result<bool> {
     state
-        .db
+        .db()
         .with(|conn| db::snippets::trigger_available(conn, &trigger, except_id.as_deref()))
 }
 
 #[tauri::command]
 pub fn list_categories(state: State<'_, AppState>) -> Result<Vec<Category>> {
-    state.db.with(db::categories::list)
+    state.db().with(db::categories::list)
 }
 
 #[tauri::command]
 pub fn create_category(state: State<'_, AppState>, name: String) -> Result<Category> {
-    state.db.with(|conn| db::categories::create(conn, &name))
+    state.db().with(|conn| db::categories::create(conn, &name))
 }
 
 #[tauri::command]
 pub fn rename_category(state: State<'_, AppState>, id: String, name: String) -> Result<Category> {
     state
-        .db
+        .db()
         .with(|conn| db::categories::rename(conn, &id, &name))
 }
 
 #[tauri::command]
 pub fn delete_category(state: State<'_, AppState>, id: String) -> Result<()> {
-    state.db.with(|conn| db::categories::delete(conn, &id))
+    state.db().with(|conn| db::categories::delete(conn, &id))
 }
 
 #[tauri::command]
 pub fn database_info(state: State<'_, AppState>) -> Result<DatabaseInfo> {
-    state.db.info()
+    state.db().info()
 }
 
 #[tauri::command]
@@ -124,7 +126,7 @@ pub fn set_expansion_enabled(
     state: State<'_, AppState>,
     enabled: bool,
 ) -> Result<Settings> {
-    let settings = state.db.with(|conn| {
+    let settings = state.db().with(|conn| {
         db::settings::apply(
             conn,
             SettingsPatch {
@@ -170,7 +172,7 @@ pub fn export_backup(
     use tauri_plugin_dialog::DialogExt;
 
     let yaml = format != "json";
-    let backup = state.db.with(|conn| backup::export(conn, now_ms()))?;
+    let backup = state.db().with(|conn| backup::export(conn, now_ms()))?;
 
     let attachments: usize = backup
         .snippets
@@ -202,7 +204,7 @@ pub fn export_backup(
         .map_err(|error| Error::Internal(error.to_string()))?;
 
     if attachments > 0 {
-        let missing = backup::write_archive(&path, &backup, &state.db.attachments())?;
+        let missing = backup::write_archive(&path, &backup, &state.db().attachments())?;
         if !missing.is_empty() {
             log::warn!(
                 "some attachments could not be exported: {}",
@@ -257,7 +259,7 @@ pub fn import_backup(
         .map_err(|error| Error::Internal(error.to_string()))?;
 
     let bytes = std::fs::read(&path)?;
-    let store = state.db.attachments();
+    let store = state.db().attachments();
     let mode = backup::ImportMode::parse(&mode);
 
     let (parsed, mut file_problems) = if backup::is_archive(&bytes) {
@@ -269,7 +271,7 @@ pub fn import_backup(
     };
 
     let mut report = state
-        .db
+        .db()
         .with(|conn| backup::import(conn, &parsed, mode, &store))?;
     report.problems.append(&mut file_problems);
 
@@ -310,7 +312,7 @@ pub fn diagnostics(app: AppHandle) -> Diagnostics {
 }
 
 fn with_presence(state: &AppState, mut snippet: Snippet) -> Snippet {
-    let store = state.db.attachments();
+    let store = state.db().attachments();
     for attachment in &mut snippet.attachments {
         attachment.present = store.exists(&attachment.digest, &attachment.name);
     }
@@ -337,7 +339,7 @@ fn attach_all(
         return Err(Error::invalid("There are no files to attach."));
     }
 
-    let store = state.db.attachments();
+    let store = state.db().attachments();
     let mut problems: Vec<String> = Vec::new();
 
     for path in sources {
@@ -350,7 +352,7 @@ fn attach_all(
         };
         let mime = attachments::mime_for(&stored.name);
         if let Err(error) = state
-            .db
+            .db()
             .with(|conn| db::attachments::add(conn, snippet_id, &stored, mime))
         {
             problems.push(format!("{}: {error}", stored.name));
@@ -369,7 +371,9 @@ fn attach_all(
         )));
     }
 
-    let snippet = state.db.with(|conn| db::snippets::get(conn, snippet_id))?;
+    let snippet = state
+        .db()
+        .with(|conn| db::snippets::get(conn, snippet_id))?;
     Ok(with_presence(state, snippet))
 }
 
@@ -409,7 +413,7 @@ pub fn pick_attachments(
 
 #[tauri::command]
 pub fn remove_attachment(state: State<'_, AppState>, id: String) -> Result<Snippet> {
-    let snippet = state.db.with(|conn| {
+    let snippet = state.db().with(|conn| {
         let attachment = db::attachments::get(conn, &id)?;
         db::attachments::remove(conn, &id)?;
         db::snippets::get(conn, &attachment.snippet_id)
@@ -424,7 +428,7 @@ pub fn reorder_attachments(
     snippet_id: String,
     ids: Vec<String>,
 ) -> Result<Snippet> {
-    let snippet = state.db.with(|conn| {
+    let snippet = state.db().with(|conn| {
         db::attachments::reorder(conn, &snippet_id, &ids)?;
         db::snippets::get(conn, &snippet_id)
     })?;
@@ -433,18 +437,18 @@ pub fn reorder_attachments(
 
 #[tauri::command]
 pub fn attachments_size(state: State<'_, AppState>) -> u64 {
-    state.db.attachments().size_bytes()
+    state.db().attachments().size_bytes()
 }
 
 fn collect_garbage(state: &AppState) {
-    let live = match state.db.with(db::attachments::live_blobs) {
+    let live = match state.db().with(db::attachments::live_blobs) {
         Ok(live) => live,
         Err(error) => {
             log::warn!("could not work out which attachments are still in use: {error}");
             return;
         }
     };
-    match state.db.attachments().gc(&live) {
+    match state.db().attachments().gc(&live) {
         Ok(0) => {}
         Ok(count) => log::info!("removed {count} unused attachment file(s)"),
         Err(error) => log::warn!("could not tidy the attachment store: {error}"),
@@ -453,7 +457,7 @@ fn collect_garbage(state: &AppState) {
 
 #[tauri::command]
 pub fn attachment_bytes(state: State<'_, AppState>, id: String) -> Result<tauri::ipc::Response> {
-    let attachment = state.db.with(|conn| db::attachments::get(conn, &id))?;
+    let attachment = state.db().with(|conn| db::attachments::get(conn, &id))?;
 
     if !attachments::is_previewable(&attachment.mime) {
         return Err(Error::invalid("That file is not one Ampello can show."));
@@ -463,7 +467,7 @@ pub fn attachment_bytes(state: State<'_, AppState>, id: String) -> Result<tauri:
     }
 
     let bytes = state
-        .db
+        .db()
         .attachments()
         .read(&attachment.digest, &attachment.name)?;
     Ok(tauri::ipc::Response::new(bytes))
@@ -481,7 +485,7 @@ pub struct LibraryInfo {
 
 #[tauri::command]
 pub fn library_info(state: State<'_, AppState>) -> LibraryInfo {
-    let location = &state.library;
+    let location = state.library.location();
     LibraryInfo {
         path: location.dir.to_string_lossy().into_owned(),
         shared: location.shared,
@@ -503,8 +507,8 @@ pub fn library_info(state: State<'_, AppState>) -> LibraryInfo {
 pub fn choose_shared_library(app: AppHandle, state: State<'_, AppState>) -> Result<Option<String>> {
     use tauri_plugin_dialog::DialogExt;
 
-    let start = if state.library.shared {
-        state.library.dir.clone()
+    let start = if state.library.location().shared {
+        state.library.location().dir.clone()
     } else {
         crate::library::default_shared_dir()
     };
@@ -525,23 +529,57 @@ pub fn choose_shared_library(app: AppHandle, state: State<'_, AppState>) -> Resu
         .into_path()
         .map_err(|error| Error::Internal(error.to_string()))?;
 
-    crate::library::set(&state.library.personal_dir, Some(&path))
-        .map_err(|error| Error::invalid(error.to_string()))?;
-
-    log::info!("shared library set to {}", path.display());
+    switch_library(&app, &state, Some(&path))?;
     Ok(Some(path.to_string_lossy().into_owned()))
 }
 
 /// Go back to this account's own library. The shared one is left untouched.
 #[tauri::command]
-pub fn use_personal_library(state: State<'_, AppState>) -> Result<()> {
-    crate::library::set(&state.library.personal_dir, None)
-        .map_err(|error| Error::invalid(error.to_string()))?;
-    log::info!("reverted to the personal library");
-    Ok(())
+pub fn use_personal_library(app: AppHandle, state: State<'_, AppState>) -> Result<()> {
+    switch_library(&app, &state, None)
 }
 
-#[tauri::command]
-pub fn restart_app(app: AppHandle) {
-    app.restart();
+/// Point this account at a different library and open it immediately.
+///
+/// The database is exchanged behind a lock rather than requiring a restart:
+/// every read goes through `AppState::db`, and the expansion engine resolves
+/// the current handle per expansion, so both follow the swap. The engine is
+/// then refreshed so its trigger set comes from the new library, and the
+/// interface is told to reload.
+///
+/// The pointer is written only after the new library opens. A directory that
+/// turns out to be unusable therefore leaves the account exactly where it was,
+/// rather than pointing it at something that will not load on next start.
+fn switch_library(
+    app: &AppHandle,
+    state: &AppState,
+    shared: Option<&std::path::Path>,
+) -> Result<()> {
+    let personal = state.library.location().personal_dir;
+
+    if let Some(dir) = shared {
+        crate::library::probe(dir).map_err(|error| Error::invalid(error.to_string()))?;
+    }
+
+    let dir = shared
+        .map(|d| d.to_path_buf())
+        .unwrap_or_else(|| personal.clone());
+    let db_path = dir.join("ampello.db");
+    let database = std::sync::Arc::new(ampello_core::Database::open(&db_path)?);
+
+    crate::library::set(&personal, shared).map_err(|error| Error::invalid(error.to_string()))?;
+
+    let location = crate::library::Resolved {
+        dir,
+        personal_dir: personal,
+        shared: shared.is_some(),
+        problem: None,
+    };
+    state.library.swap(database, location);
+
+    state.input.refresh();
+    let _ = app.emit(crate::LIBRARY_EVENT, ());
+
+    log::info!("library switched to {}", db_path.display());
+    Ok(())
 }

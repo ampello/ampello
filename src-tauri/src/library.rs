@@ -107,6 +107,16 @@ pub fn set(personal_dir: &Path, shared: Option<&Path>) -> std::io::Result<()> {
     std::fs::write(personal_dir.join(POINTER), body)
 }
 
+/// Check that a directory can hold a library, and say why if it cannot.
+///
+/// A folder inside another account's profile is the usual reason this fails:
+/// Windows keeps user profiles private, so the attempt returns a permission
+/// error rather than the directory simply being absent.
+pub fn probe(dir: &Path) -> std::io::Result<()> {
+    std::fs::create_dir_all(dir)?;
+    writable(dir)
+}
+
 // Checked by writing rather than by reading permissions: an account can hold
 // rights it cannot use, and a folder on a disconnected drive reports nothing
 // useful at all. A shared library that turns out to be read-only at the first
@@ -228,5 +238,93 @@ mod tests {
         set(&bob, None).unwrap();
         assert!(resolve(&alice).shared);
         assert!(!resolve(&bob).shared);
+    }
+}
+
+#[cfg(test)]
+mod switching {
+    use super::*;
+    use ampello_core::db::snippets;
+    use ampello_core::models::NewSnippet;
+    use ampello_core::Database;
+
+    fn temp(label: &str) -> PathBuf {
+        let dir = std::env::temp_dir().join(format!(
+            "ampello-switch-{label}-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    fn seed(dir: &Path, trigger: &str) {
+        let db = Database::open(&dir.join(DATABASE)).unwrap();
+        db.with(|conn| {
+            snippets::create(
+                conn,
+                NewSnippet {
+                    trigger: trigger.into(),
+                    content: "x".into(),
+                    category_id: None,
+                },
+            )?;
+            Ok(())
+        })
+        .unwrap();
+    }
+
+    fn triggers(dir: &Path) -> Vec<String> {
+        let db = Database::open(&dir.join(DATABASE)).unwrap();
+        db.with(|conn| snippets::list_summaries(conn))
+            .unwrap()
+            .into_iter()
+            .map(|s| s.trigger)
+            .collect()
+    }
+
+    #[test]
+    fn switching_to_a_shared_library_reads_that_librarys_snippets() {
+        let personal = temp("live-personal");
+        let shared = temp("live-shared");
+        seed(&personal, ":mine");
+        seed(&shared, ":ours");
+
+        set(&personal, Some(&shared)).unwrap();
+        let resolved = resolve(&personal);
+
+        assert!(resolved.shared);
+        assert_eq!(triggers(&resolved.dir), [":ours"]);
+        // The account's own snippets are untouched and still there to return to.
+        assert_eq!(triggers(&personal), [":mine"]);
+    }
+
+    #[test]
+    fn two_accounts_sharing_see_each_others_writes() {
+        let alice = temp("alice-live");
+        let bob = temp("bob-live");
+        let shared = temp("shared-live");
+
+        set(&alice, Some(&shared)).unwrap();
+        set(&bob, Some(&shared)).unwrap();
+
+        // Alice adds a snippet to the shared library.
+        seed(&resolve(&alice).dir, ":shared-one");
+
+        // Bob, resolving independently, reads the same file and sees it.
+        assert_eq!(triggers(&resolve(&bob).dir), [":shared-one"]);
+    }
+
+    #[test]
+    fn probe_rejects_a_directory_that_cannot_hold_a_library() {
+        // Stands in for a folder inside another account's profile, which is
+        // the case that actually bites: it exists but cannot be written to.
+        let personal = temp("probe");
+        let blocker = personal.join("file");
+        std::fs::write(&blocker, b"not a directory").unwrap();
+
+        assert!(probe(&blocker.join("library")).is_err());
+        assert!(probe(&personal.join("fresh")).is_ok());
     }
 }

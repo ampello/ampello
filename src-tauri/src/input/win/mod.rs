@@ -25,9 +25,9 @@ use windows_sys::Win32::UI::WindowsAndMessaging::{
     WM_SYSKEYDOWN, WM_SYSKEYUP,
 };
 
+use crate::state::Library;
 use ampello_core::db;
 use ampello_core::engine::{BoundaryMode, Engine, Expansion, Key, Trigger};
-use ampello_core::Database;
 
 use super::{EngineStatus, ExpandedCallback};
 
@@ -139,13 +139,13 @@ enum Job {
 
 pub struct InputService {
     shared: Arc<Shared>,
-    db: Arc<Database>,
+    library: Arc<Library>,
     hook_thread: AtomicU32,
     error: Mutex<Option<String>>,
 }
 
 impl InputService {
-    pub fn start(db: Arc<Database>, on_expanded: ExpandedCallback) -> Self {
+    pub fn start(library: Arc<Library>, on_expanded: ExpandedCallback) -> Self {
         let (jobs, receiver) = mpsc::channel::<Job>();
 
         let shared = Arc::new(Shared {
@@ -162,7 +162,7 @@ impl InputService {
 
         let service = Self {
             shared: Arc::clone(&shared),
-            db: Arc::clone(&db),
+            library: Arc::clone(&library),
             hook_thread: AtomicU32::new(0),
             error: Mutex::new(None),
         };
@@ -173,10 +173,10 @@ impl InputService {
 
         {
             let shared = Arc::clone(&shared);
-            let db = Arc::clone(&db);
+            let library = Arc::clone(&library);
             thread::Builder::new()
                 .name("ampello-injector".into())
-                .spawn(move || worker(shared, receiver, db, on_expanded))
+                .spawn(move || worker(shared, receiver, library, on_expanded))
                 .expect("could not start Ampello's injector thread");
         }
 
@@ -233,7 +233,7 @@ impl InputService {
     }
 
     pub fn refresh(&self) {
-        let loaded = self.db.with(|conn| {
+        let loaded = self.library.db().with(|conn| {
             let settings = db::settings::load(conn)?;
             let triggers = db::snippets::enabled_triggers(conn)?;
             Ok((settings, triggers))
@@ -506,7 +506,7 @@ unsafe fn translate(vk: u16, scan_code: u32, state: &[u8; 256]) -> Option<String
 fn worker(
     shared: Arc<Shared>,
     jobs: mpsc::Receiver<Job>,
-    db: Arc<Database>,
+    library: Arc<Library>,
     on_expanded: ExpandedCallback,
 ) {
     while let Ok(job) = jobs.recv() {
@@ -534,8 +534,10 @@ fn worker(
         };
 
         let config = *shared.config.lock();
-        let outcome = catch_unwind(AssertUnwindSafe(|| expand(&db, &expansion, config, window)))
-            .unwrap_or_else(|_| Err("Ampello's injector panicked.".into()));
+        let outcome = catch_unwind(AssertUnwindSafe(|| {
+            expand(&library, &expansion, config, window)
+        }))
+        .unwrap_or_else(|_| Err("Ampello's injector panicked.".into()));
 
         shared.injecting.store(false, Ordering::Release);
 
@@ -590,11 +592,12 @@ fn insert_clipboard(config: Config) -> Result<(), String> {
 }
 
 fn expand(
-    db: &Database,
+    library: &Library,
     expansion: &Expansion,
     config: Config,
     window: usize,
 ) -> Result<(), String> {
+    let db = library.db();
     let snippet = match db.with(|conn| db::snippets::get(conn, &expansion.snippet_id)) {
         Ok(snippet) => snippet,
         Err(error) => {

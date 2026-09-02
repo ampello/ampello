@@ -8,6 +8,7 @@ import { useUiStore } from "@/stores/uiStore";
 const EXPANDED = "ampello://expanded";
 const SETTINGS_CHANGED = "ampello://settings-changed";
 const OPEN_SETTINGS = "ampello://open-settings";
+const LIBRARY_CHANGED = "ampello://library-changed";
 
 export function useAppEvents() {
   useEffect(() => {
@@ -48,11 +49,19 @@ export function useAppEvents() {
       useUiStore.getState().setView("settings");
     };
 
+    // The library was exchanged underneath us, so nothing currently on screen
+    // belongs to it: reload snippets, collections and settings together.
+    const reloadLibrary = () => {
+      void useDataStore.getState().load().catch(() => undefined);
+      void useSettingsStore.getState().load();
+    };
+
     void import("@tauri-apps/api/event").then(async ({ listen }) => {
       const subscriptions = await Promise.all([
         listen(EXPANDED, refreshUsage),
         listen(SETTINGS_CHANGED, reloadSettings),
         listen(OPEN_SETTINGS, openSettings),
+        listen(LIBRARY_CHANGED, reloadLibrary),
       ]);
       if (cancelled) subscriptions.forEach((stop) => stop());
       else stoppers.push(...subscriptions);

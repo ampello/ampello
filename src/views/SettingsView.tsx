@@ -79,7 +79,6 @@ export function SettingsView() {
   const [engine, setEngine] = useState<EngineStatus | null>(null);
   const [info, setInfo] = useState<DatabaseInfo | null>(null);
   const [library, setLibrary] = useState<LibraryInfo | null>(null);
-  const [pendingRestart, setPendingRestart] = useState(false);
   const [diag, setDiag] = useState<Diagnostics | null>(null);
   const [shortcutProblem, setShortcutProblem] = useState<string | null>(null);
   const [busy, setBusy] = useState<"export" | "import" | "library" | null>(null);
@@ -139,8 +138,9 @@ export function SettingsView() {
     try {
       const path = await ipc.chooseSharedLibrary();
       if (path) {
-        setPendingRestart(true);
-        pushToast("info", `Shared library set to ${path}`);
+        setLibrary(await ipc.libraryInfo());
+        setInfo(await ipc.databaseInfo());
+        pushToast("info", `Now using the shared library at ${path}`);
       }
     } catch (error) {
       reportError(error);
@@ -153,8 +153,9 @@ export function SettingsView() {
     setBusy("library");
     try {
       await ipc.usePersonalLibrary();
-      setPendingRestart(true);
-      pushToast("info", "Ampello will use this account's own library.");
+      setLibrary(await ipc.libraryInfo());
+      setInfo(await ipc.databaseInfo());
+      pushToast("info", "Now using this account's own library.");
     } catch (error) {
       reportError(error);
     } finally {
@@ -475,20 +476,6 @@ export function SettingsView() {
               }
             />
 
-            {pendingRestart ? (
-              <SettingsBlock>
-                <div className="flex flex-wrap items-center gap-3">
-                  <p className="flex-1 text-[12.5px] text-secondary">
-                    Ampello will use the new library location when it restarts.
-                    Snippets are not copied between libraries - use Export and
-                    Import to move them.
-                  </p>
-                  <Button size="sm" variant="primary" onClick={() => void ipc.restartApp()}>
-                    Restart now
-                  </Button>
-                </div>
-              </SettingsBlock>
-            ) : null}
 
             <SettingsRow
               label="Export"

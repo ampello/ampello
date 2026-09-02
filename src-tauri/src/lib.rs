@@ -22,6 +22,8 @@ pub const SETTINGS_EVENT: &str = "ampello://settings-changed";
 
 pub const OPEN_SETTINGS_EVENT: &str = "ampello://open-settings";
 
+pub const LIBRARY_EVENT: &str = "ampello://library-changed";
+
 pub const HIDDEN_FLAG: &str = "--hidden";
 
 pub fn run() {
@@ -32,7 +34,8 @@ pub fn run() {
                 .max_file_size(2_000_000)
                 .rotation_strategy(tauri_plugin_log::RotationStrategy::KeepOne)
                 .target(tauri_plugin_log::Target::new(
-                    tauri_plugin_log::TargetKind::LogDir {
+                    tauri_plugin_log::TargetKind::Folder {
+                        path: data_dir().join("logs"),
                         file_name: Some("ampello".into()),
                     },
                 ))
@@ -51,7 +54,7 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
-            let data_dir = app.path().app_data_dir()?;
+            let data_dir = data_dir();
             std::fs::create_dir_all(&data_dir)?;
 
             // The personal library is always adopted first: a shared one is a
@@ -82,10 +85,11 @@ pub fn run() {
                 );
             }
             let settings = database.with(ampello_core::db::settings::load)?;
+            let library = Arc::new(state::Library::new(Arc::clone(&database), location));
 
             let handle = app.handle().clone();
             let input = InputService::start(
-                Arc::clone(&database),
+                Arc::clone(&library),
                 Box::new(move |snippet_id: &str| {
                     let _ = handle.emit(EXPANDED_EVENT, snippet_id.to_string());
                 }),
@@ -95,7 +99,7 @@ pub fn run() {
             if start_hidden {
                 log::info!("started by the system; staying in the tray");
             }
-            app.manage(AppState::new(database, input, start_hidden, location));
+            app.manage(AppState::new(library, input, start_hidden));
 
             let handle = app.handle().clone();
             tray::create(&handle, settings.expansion_enabled)?;
@@ -146,7 +150,6 @@ pub fn run() {
             commands::library_info,
             commands::choose_shared_library,
             commands::use_personal_library,
-            commands::restart_app,
             commands::diagnostics,
         ])
         .build(tauri::generate_context!())
@@ -160,11 +163,25 @@ pub fn run() {
         });
 }
 
-// The application was renamed from Repla. The data directory is derived from
-// the bundle identifier, so without this a rename would point at an empty
-// folder and leave the user's library on disk under a name nothing looks for.
-const PREVIOUS_IDENTIFIER: &str = "com.yohann.repla";
-const PREVIOUS_DATABASE: &str = "repla.db";
+/// Where the library lives: `%APPDATA%\Ampello`, the form ordinary Windows
+/// applications use, rather than a reverse-DNS bundle identifier.
+pub fn data_dir() -> std::path::PathBuf {
+    if let Some(appdata) = std::env::var_os("APPDATA") {
+        return std::path::PathBuf::from(appdata).join("Ampello");
+    }
+    std::env::var_os("HOME")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|| std::path::PathBuf::from("."))
+        .join(".local/share/ampello")
+}
+
+// Locations the library has previously occupied, newest first. Each rename,
+// of the application and then of the folder convention, left snippets on disk
+// under a name nothing looks for any more.
+const PREVIOUS_LOCATIONS: &[(&str, &str)] = &[
+    ("com.yohann.ampello", "ampello.db"),
+    ("com.yohann.repla", "repla.db"),
+];
 
 fn adopt_previous_library(data_dir: &std::path::Path, db_path: &std::path::Path) {
     // Never runs against a library already in use.
@@ -174,21 +191,24 @@ fn adopt_previous_library(data_dir: &std::path::Path, db_path: &std::path::Path)
     let Some(parent) = data_dir.parent() else {
         return;
     };
-    let previous = parent.join(PREVIOUS_IDENTIFIER);
-    let previous_db = previous.join(PREVIOUS_DATABASE);
-    if !previous_db.is_file() {
+
+    let Some((previous, previous_db_name)) = PREVIOUS_LOCATIONS
+        .iter()
+        .map(|(folder, db)| (parent.join(folder), *db))
+        .find(|(dir, db)| dir.join(db).is_file())
+    else {
         return;
-    }
+    };
 
     log::info!(
-        "found a library under the previous name at {}; moving it across",
+        "found a library at the previous location {}; moving it across",
         previous.display()
     );
 
     // The write-ahead log holds writes the .db file does not yet; moving the
     // database without it silently loses the most recent edits.
     for suffix in ["", "-wal", "-shm"] {
-        let from = previous.join(format!("{PREVIOUS_DATABASE}{suffix}"));
+        let from = previous.join(format!("{previous_db_name}{suffix}"));
         if !from.exists() {
             continue;
         }
@@ -212,7 +232,7 @@ fn adopt_previous_library(data_dir: &std::path::Path, db_path: &std::path::Path)
 
 fn close_to_tray(app: &AppHandle) -> bool {
     app.try_state::<AppState>()
-        .and_then(|state| state.db.with(ampello_core::db::settings::load).ok())
+        .and_then(|state| state.db().with(ampello_core::db::settings::load).ok())
         .map(|settings| settings.close_to_tray)
         .unwrap_or(true)
 }

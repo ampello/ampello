@@ -111,25 +111,32 @@ several accounts may be configured to use a common directory:
 2. Choose a directory accessible to every participating account.
    `C:\Users\Public\Ampello` is proposed by default, as Windows grants write
    access to all accounts there without further configuration.
-3. Restart Ampello and repeat the procedure for each account.
+3. Repeat the procedure for each account that should join.
 
 No data is shared until an account is explicitly configured to use the shared
 directory. Selecting **Use personal** returns that account to its own library
 and leaves the shared one unmodified.
 
-Three constraints apply. Snippets are not copied between libraries; use Export
-and Import to transfer them. A running instance does not observe changes made
-by another account until it restarts, which is relevant only when several
-accounts are signed in concurrently. The directory must reside on a local
-volume, as SQLite's write-ahead log is not reliable over network shares.
+The change takes effect immediately. Ampello does not need to be restarted.
+
+The directory must be readable and writable by every participating account.
+A folder inside another account's user profile will not work, because Windows
+keeps profiles private, which is why `C:\Users\Public\Ampello` is the default.
+It must also be on a local volume, as SQLite's write-ahead log is not reliable
+over network shares.
+
+Snippets are not copied between libraries; use Export and Import to transfer
+them. A running instance does not observe edits made by another account until
+it reopens the library, which is relevant only when several accounts are
+signed in at the same time.
 
 ### Data locations
 
 | Item | Path |
 | --- | --- |
-| Library | `%APPDATA%\com.yohann.ampello\ampello.db` |
+| Library | `%APPDATA%\Ampello\ampello.db` |
 | Attachments | `attachments\` adjacent to the library |
-| Log | reported in Settings → Data |
+| Log | `%APPDATA%\Ampello\logs\` |
 
 Attachments are content-addressed by SHA-256, so a file referenced by several
 snippets is stored once.
@@ -230,5 +237,5 @@ fix.
 
 ## License
 
-[GNU General Public License v3.0 or later](LICENSE).
-Ampello was created by Yohann Joachim Zapata  
+Ampello was created by Yohann Joachim Zapata and is licensed under the [GNU General Public License v3.0 or later](LICENSE).
+ 
