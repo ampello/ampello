@@ -47,7 +47,7 @@ export const useUiStore = create<UiState>((set) => ({
   setSearch: (search) => set({ search }),
   openEditor: (id) =>
     set((state) => ({
-      view: "editor",
+      view: "snippets",
       editingId: id ?? "new",
       draftCategoryId:
         id === null && state.view === "snippets" && state.scope.kind === "category"

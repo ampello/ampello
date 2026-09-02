@@ -7,6 +7,8 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Spinner } from "@/components/ui/Spinner";
 import { SearchField } from "@/components/snippets/SearchField";
 import { SnippetList } from "@/components/snippets/SnippetList";
+import { EditorView } from "@/views/EditorView";
+import { Button } from "@/components/ui/Button";
 import { useDataStore } from "@/stores/dataStore";
 import { useUiStore } from "@/stores/uiStore";
 import { reportError } from "@/stores/toastStore";
@@ -15,6 +17,8 @@ import type { SnippetSummary } from "@/lib/types";
 export function SnippetsView() {
   const scope = useUiStore((s) => s.scope);
   const openEditor = useUiStore((s) => s.openEditor);
+  const editingId = useUiStore((s) => s.editingId);
+  const closeEditor = useUiStore((s) => s.closeEditor);
 
   const snippets = useDataStore((s) => s.snippets);
   const categories = useDataStore((s) => s.categories);
@@ -26,8 +30,12 @@ export function SnippetsView() {
   const setEnabled = useDataStore((s) => s.setEnabled);
   const removeSnippet = useDataStore((s) => s.removeSnippet);
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<SnippetSummary | null>(null);
+
+  // A row is selected precisely when the pane is showing it. "new" is a
+  // draft that has no row yet.
+  const selectedId = editingId === "new" ? null : editingId;
+  const setSelectedId = (id: string | null) => (id ? openEditor(id) : closeEditor());
 
   const scopeTitle =
     scope.kind === "all"
@@ -68,9 +76,6 @@ export function SnippetsView() {
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       move(-1);
-    } else if (event.key === "Enter" && selectedId) {
-      event.preventDefault();
-      openEditor(selectedId);
     } else if (event.key === "Delete" && selectedId && !isTyping(event.target)) {
       const snippet = visible.find((s) => s.id === selectedId);
       if (snippet) {
@@ -88,7 +93,8 @@ export function SnippetsView() {
         center={<SearchField value={query} onChange={setQuery} />}
       />
 
-      <div className="min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1">
+        <div className="min-h-0 min-w-0 flex-1">
         {searching && visible.length === 0 ? (
           <div className="flex h-full items-center justify-center">
             <Spinner />
@@ -126,6 +132,25 @@ export function SnippetsView() {
         ) : (
           <EmptyState description="A snippet created while this collection is open is added to it. An existing snippet can be moved in from its editor." />
         )}
+        </div>
+
+        {/* The detail pane: the selected snippet stays beside the list rather
+            than replacing it, so moving between snippets costs one click. */}
+        <aside className="flex w-[420px] shrink-0 flex-col border-l border-border bg-bg">
+          {editingId ? (
+            <EditorView key={editingId} id={editingId} inline />
+          ) : (
+            <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+              <p className="text-[13px] font-medium text-primary">No snippet selected</p>
+              <p className="text-[12.5px] text-secondary">
+                Choose one from the list, or create a new snippet.
+              </p>
+              <Button size="sm" onClick={() => openEditor(null)}>
+                New snippet
+              </Button>
+            </div>
+          )}
+        </aside>
       </div>
 
       {pendingDelete ? (

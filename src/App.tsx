@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-import { Suspense, lazy, useEffect } from "react";
+import { useEffect } from "react";
 import * as ipc from "@/lib/ipc";
 import { useToastStore } from "@/stores/toastStore";
 import { AppShell } from "@/components/layout/AppShell";
@@ -11,9 +11,6 @@ import { SnippetsView } from "@/views/SnippetsView";
 import { SettingsView } from "@/views/SettingsView";
 import { BootErrorView } from "@/views/BootErrorView";
 
-const EditorView = lazy(() =>
-  import("@/views/EditorView").then((module) => ({ default: module.EditorView })),
-);
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useDataStore } from "@/stores/dataStore";
 import { useUiStore } from "@/stores/uiStore";
@@ -29,7 +26,6 @@ export default function App() {
   const dataError = useDataStore((s) => s.error);
   const loadData = useDataStore((s) => s.load);
   const view = useUiStore((s) => s.view);
-  const editingId = useUiStore((s) => s.editingId);
 
   useThemeSync();
   useGlobalHotkeys();
@@ -94,17 +90,6 @@ export default function App() {
         {view === "dashboard" ? <DashboardView /> : null}
         {view === "snippets" ? <SnippetsView /> : null}
         {view === "settings" ? <SettingsView /> : null}
-        {view === "editor" && editingId ? (
-          <Suspense
-            fallback={
-              <div className="flex flex-1 items-center justify-center">
-                <Spinner />
-              </div>
-            }
-          >
-            <EditorView key={editingId} id={editingId} />
-          </Suspense>
-        ) : null}
         </div>
       </AppShell>
       <WindowControls />

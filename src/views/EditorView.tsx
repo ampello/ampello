@@ -25,9 +25,10 @@ interface Loaded {
   categoryId: string | null;
 }
 
-export function EditorView({ id }: { id: string }) {
+export function EditorView({ id, inline = false }: { id: string; inline?: boolean }) {
   const isNew = id === "new";
   const closeEditor = useUiStore((s) => s.closeEditor);
+  const openEditor = useUiStore((s) => s.openEditor);
   const draftCategoryId = useUiStore((s) => s.draftCategoryId);
   const categories = useDataStore((s) => s.categories);
   const createSnippet = useDataStore((s) => s.createSnippet);
@@ -132,12 +133,14 @@ export function EditorView({ id }: { id: string }) {
     const content = editorRef.current?.getValue() ?? loaded?.content ?? "";
     setSaving(true);
     try {
+      let createdId: string | null = null;
       if (isNew) {
         const created = await createSnippet({
           trigger: cleanTrigger,
           content,
           categoryId,
         });
+        createdId = created.id;
         if (favorite) await saveSnippet(created.id, { favorite: true });
       } else {
         await saveSnippet(id, {
@@ -150,7 +153,12 @@ export function EditorView({ id }: { id: string }) {
       setContentDirty(false);
       setFieldsDirty(false);
       pushToast("info", isNew ? `Created ${cleanTrigger}` : `Saved ${cleanTrigger}`);
-      closeEditor();
+
+      // In the pane the snippet stays selected after saving: emptying it would
+      // throw away the place the user was working in. A new snippet switches
+      // from the draft to the row that now exists.
+      if (!inline) closeEditor();
+      else if (createdId) openEditor(createdId);
     } catch (error) {
       reportError(error);
     } finally {
@@ -195,23 +203,28 @@ export function EditorView({ id }: { id: string }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <header
-        data-tauri-drag-region
-        className="flex h-12 shrink-0 items-center gap-3 border-b border-border bg-bg pl-3 pr-[158px]"
+        {...(inline ? {} : { "data-tauri-drag-region": true })}
+        className={cn(
+          "flex h-12 shrink-0 items-center gap-2 border-b border-border bg-bg",
+          inline ? "px-3" : "gap-3 pl-3 pr-[158px]",
+        )}
       >
-        <IconButton label="Back to snippets" onClick={requestClose}>
-          <ArrowLeft size={16} strokeWidth={1.75} />
-        </IconButton>
+        {inline ? null : (
+          <IconButton label="Back to snippets" onClick={requestClose}>
+            <ArrowLeft size={16} strokeWidth={1.75} />
+          </IconButton>
+        )}
         <h1
-          data-tauri-drag-region
+          {...(inline ? {} : { "data-tauri-drag-region": true })}
           className="text-[13.5px] font-semibold text-primary"
         >
           {isNew ? "New Snippet" : "Edit Snippet"}
         </h1>
         {dirty ? (
-          <span className="text-[12px] text-muted">Unsaved changes</span>
+          <span className="text-[12px] text-muted">Unsaved</span>
         ) : null}
 
-        <div data-tauri-drag-region className="flex-1" />
+        <div {...(inline ? {} : { "data-tauri-drag-region": true })} className="flex-1" />
 
         <IconButton
           label={favorite ? "Remove from favorites" : "Add to favorites"}
@@ -224,15 +237,29 @@ export function EditorView({ id }: { id: string }) {
         >
           <Star size={15} strokeWidth={1.75} fill={favorite ? "currentColor" : "none"} />
         </IconButton>
-        <Button onClick={requestClose}>Cancel</Button>
-        <Button variant="primary" onClick={() => void save()} disabled={saving}>
+        {inline ? null : <Button onClick={requestClose}>Cancel</Button>}
+        <Button
+          variant="primary"
+          size={inline ? "sm" : "md"}
+          onClick={() => void save()}
+          disabled={saving}
+        >
           {saving ? "Saving…" : "Save"}
         </Button>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col px-6 pb-4 pt-5">
-        <div className="mb-4 flex flex-wrap items-start gap-4">
-          <Field label="Trigger" className="min-w-[240px] flex-1" error={triggerProblem}>
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col pb-4 pt-4",
+          inline ? "px-3" : "px-6 pt-5",
+        )}
+      >
+        <div className={cn("mb-4 flex items-start gap-4", inline ? "flex-col gap-3" : "flex-wrap")}>
+          <Field
+            label="Trigger"
+            className={inline ? "w-full" : "min-w-[240px] flex-1"}
+            error={triggerProblem}
+          >
             <Input
               mono
               value={trigger}
@@ -246,7 +273,7 @@ export function EditorView({ id }: { id: string }) {
             />
           </Field>
 
-          <Field label="Collection" className="w-[190px]">
+          <Field label="Collection" className={inline ? "w-full" : "w-[190px]"}>
             <select
               value={categoryId ?? ""}
               onChange={(event) => {
