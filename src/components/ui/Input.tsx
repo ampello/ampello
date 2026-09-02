@@ -22,7 +22,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         "ease-[var(--ease-out)] focus:outline-none focus-visible:outline-none",
         invalid
           ? "border-danger focus:border-danger focus:shadow-[0_0_0_3px_var(--danger-soft)]"
-          : "border-border focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)]",
+          : "border-border focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-ring)]",
         mono && "font-mono",
         className,
       )}

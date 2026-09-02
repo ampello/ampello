@@ -33,9 +33,10 @@
   --text-muted: #84848e;
   --text-inverted: #ffffff;
 
-  --accent: #18181b;
-  --accent-hover: #2f2f34;
-  --accent-active: #45454b;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-active: #1a43bd;
+  --accent-ring: rgba(37, 99, 235, 0.20);
   --accent-soft: #f0f0f2;
   --accent-soft-hover: #e7e7ea;
   --accent-contrast: #ffffff;
@@ -55,14 +56,14 @@
   --shadow-md: 0 1px 3px rgba(16, 16, 20, 0.05), 0 6px 18px rgba(16, 16, 20, 0.06);
   --shadow-lg: 0 2px 8px rgba(16, 16, 20, 0.06), 0 18px 44px rgba(16, 16, 20, 0.12);
 
-  --selection: rgba(24, 24, 27, 0.13);
+  --selection: rgba(37, 99, 235, 0.16);
 
   /* The close button keeps Windows' own convention rather than Ampello's
      accent, because that is the one control everybody already knows. */
   --titlebar-close: #c42b1c;
   --titlebar-close-text: #ffffff;
   --editor-gutter: #84848e;
-  --editor-active-line: rgba(24, 24, 27, 0.035);
+  --editor-active-line: rgba(37, 99, 235, 0.045);
 }
 
 [data-theme="dark"] {
@@ -83,12 +84,13 @@
   --text-muted: #86868f;
   --text-inverted: #18181b;
 
-  --accent: #f4f4f5;
-  --accent-hover: #ffffff;
-  --accent-active: #e4e4e7;
+  --accent: #60a5fa;
+  --accent-hover: #7cb3fb;
+  --accent-active: #93c5fd;
+  --accent-ring: rgba(96, 165, 250, 0.26);
   --accent-soft: #2e2e33;
   --accent-soft-hover: #3a3a40;
-  --accent-contrast: #18181b;
+  --accent-contrast: #ffffff;
   --knob-off: #c8c8cf;
   --raised: #3f3f46;
 
@@ -105,12 +107,12 @@
   --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.32), 0 8px 20px rgba(0, 0, 0, 0.34);
   --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.34), 0 20px 44px rgba(0, 0, 0, 0.46);
 
-  --selection: rgba(244, 244, 245, 0.20);
+  --selection: rgba(96, 165, 250, 0.24);
 
   --titlebar-close: #e81123;
   --titlebar-close-text: #ffffff;
   --editor-gutter: #86868f;
-  --editor-active-line: rgba(244, 244, 245, 0.045);
+  --editor-active-line: rgba(96, 165, 250, 0.06);
 }
 
 @theme inline {
@@ -134,6 +136,7 @@
   --color-accent-active: var(--accent-active);
   --color-accent-soft: var(--accent-soft);
   --color-accent-soft-hover: var(--accent-soft-hover);
+  --color-accent-ring: var(--accent-ring);
   --color-accent-contrast: var(--accent-contrast);
   --color-knob-off: var(--knob-off);
   --color-raised: var(--raised);

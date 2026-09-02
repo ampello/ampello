@@ -50,9 +50,7 @@ export function Sidebar() {
         data-tauri-drag-region
         className={cn(
           "flex h-12 shrink-0 items-center border-b border-border",
-          "transition-[padding] duration-[240ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
-
-          collapsed ? "pl-[14px]" : "pl-3",
+          collapsed ? "justify-center px-0" : "pl-3",
         )}
       >
         <IconButton
@@ -66,9 +64,7 @@ export function Sidebar() {
       </div>
       <div
         className={cn(
-          "shrink-0 pt-3",
-          "transition-[padding] duration-[240ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
-          collapsed ? "px-3" : "px-2.5",
+          "shrink-0 px-2.5 pt-3",
         )}
       >
         <NavItem
@@ -81,9 +77,8 @@ export function Sidebar() {
       </div>
       <div
         className={cn(
-          "flex shrink-0 pb-4 pt-2",
-          "transition-[padding] duration-[240ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
-          collapsed ? "justify-center px-2" : "px-2.5",
+          "flex shrink-0 px-2.5 pb-4 pt-2",
+          collapsed && "justify-center",
         )}
       >
         <Button
@@ -94,7 +89,7 @@ export function Sidebar() {
             "overflow-hidden",
 
             collapsed
-              ? "h-8 w-8 justify-center px-0"
+              ? "h-[30px] w-[36px] justify-center px-0"
               : "h-[30px] w-full justify-start gap-2.5 px-2",
           )}
         >
@@ -105,9 +100,7 @@ export function Sidebar() {
 
       <div
         className={cn(
-          "flex-1 overflow-y-auto overflow-x-hidden pb-3",
-          "transition-[padding] duration-[240ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
-          collapsed ? "px-3" : "px-2.5",
+          "flex-1 overflow-y-auto overflow-x-hidden px-2.5 pb-3",
         )}
       >
         <NavItem
@@ -205,9 +198,7 @@ export function Sidebar() {
 
       <div
         className={cn(
-          "shrink-0 overflow-hidden border-t border-border py-2.5",
-          "transition-[padding] duration-[240ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
-          collapsed ? "px-3" : "px-2.5",
+          "shrink-0 overflow-hidden border-t border-border px-2.5 py-2.5",
         )}
       >
         <NavItem
@@ -269,8 +260,9 @@ function NavItem({
         title={collapsed ? label : undefined}
         aria-current={active ? "page" : undefined}
         className={cn(
-          "flex h-[30px] w-full items-center gap-2.5 overflow-hidden rounded-[8px] px-2",
+          "flex h-[30px] w-full items-center overflow-hidden rounded-[8px]",
           "text-[13px] font-medium transition-colors duration-150",
+          collapsed ? "justify-center px-0" : "gap-2.5 px-2",
           active
             ? "bg-accent-soft text-accent"
             : "text-secondary hover:bg-surface-2 hover:text-primary",
@@ -284,8 +276,10 @@ function NavItem({
             active ? "text-accent" : "text-muted group-hover:text-secondary",
           )}
         />
-        <span className="min-w-0 flex-1 truncate text-left">{label}</span>
-        {typeof count === "number" && count > 0 ? (
+        {collapsed ? null : (
+          <span className="min-w-0 flex-1 truncate text-left">{label}</span>
+        )}
+        {!collapsed && typeof count === "number" && count > 0 ? (
           <span
             className={cn(
               "shrink-0 text-[11.5px] tabular-nums",
