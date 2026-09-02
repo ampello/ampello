@@ -17,120 +17,130 @@
 
 ---
 
-## What is Ampello?
+## Overview
 
-Ampello watches for short abbreviations as you type and replaces them with
-longer content. It works in every application on your machine: browsers, code
-editors, chat clients, email, terminals.
+Ampello is a text expander for Windows. It monitors keyboard input
+system-wide, detects user-defined abbreviations, and substitutes them with
+their associated content. Expansion is available in any application that
+accepts keyboard input, including browsers, editors, terminals, email clients
+and chat applications.
 
-You define a trigger and the content it stands for. When you finish typing the
-trigger, Ampello removes it and inserts the content in its place.
+A snippet consists of a trigger, a body of text, and an optional ordered set of
+file attachments. Content is stored verbatim and reproduced without
+modification: no trimming, no whitespace normalisation, and no length limit
+beyond available storage.
 
 ```
-:email      →   Hello,
-                Thank you for reaching out.
-                Best regards,
-                Yohann
+Trigger      Expansion
+:email       Hello,
+             Thank you for reaching out.
 
-:report     →   See the attached files.
-                📎 contract.pdf   📎 figures.xlsx   📎 chart.png
+             Best regards,
+             Yohann
+
+:report      See the attached files.
+             contract.pdf, figures.xlsx, chart.png
 ```
-
-A snippet is a trigger, a body of text, and any files that go with it. Ampello
-does not ask what kind of text it is, or what kind of file. One character or
-fifty thousand are the same thing to the data model, as are a PNG, a PDF and a
-`.docx`.
 
 ## Features
 
-* **Works everywhere.** A system-wide keyboard hook, not a browser extension or
-  an editor plugin.
-* **File attachments.** A snippet can carry any files, delivered in the order
-  you choose. Chat prompts and web forms receive them as uploads.
-* **Fast.** Trigger matching costs about 31 ns per keystroke, measured on a
-  library of ten thousand snippets.
-* **Interruptible.** Press Escape while a long snippet is being inserted and it
-  stops where it is.
-* **Clipboard shortcut.** A second shortcut inserts the current clipboard as
-  keystrokes, for applications that refuse or reformat a paste.
-* **Local and private.** One SQLite file on your machine. No account, no sync,
-  no telemetry, and no network client of any kind.
-* **Shared libraries.** Accounts on the same machine can opt in to a shared
-  snippet folder. Private by default.
-* **Readable backups.** Exports are YAML you can diff and edit by hand.
+* **System-wide expansion.** Implemented as a low-level keyboard hook rather
+  than a browser extension or an editor plugin, so a single library serves
+  every application.
+* **File attachments.** Snippets may carry arbitrary files, delivered in a
+  defined order. Applications that accept pasted files, such as web upload
+  fields and chat composers, receive them as attachments.
+* **Predictable performance.** Trigger matching costs approximately 31 ns per
+  keystroke against a library of ten thousand snippets, measured on a release
+  build.
+* **Cancellable insertion.** Pressing Escape during a long insertion halts it
+  at the current position.
+* **Clipboard shortcut.** A separate global shortcut inserts the current
+  clipboard contents as synthetic keystrokes, for applications that reject or
+  reformat a standard paste.
+* **Local storage only.** Data is held in a single SQLite database on the local
+  machine. Ampello has no account system, no synchronisation service and no
+  network client.
+* **Optional shared libraries.** Accounts on the same machine may opt in to a
+  common snippet directory. Libraries are private to each account by default.
+* **Portable backups.** Exports are plain YAML, suitable for version control
+  and manual editing.
 
 ## Installation
 
-Download the latest installer from the
-[releases page](https://github.com/ampello/ampello/releases) and run it.
+Download the installer for your architecture from the
+[releases page](https://github.com/ampello/ampello/releases).
 
 | Architecture | File |
 | --- | --- |
-| x64 (most PCs) | `Ampello_<version>_x64-setup.exe` |
-| ARM64 (Snapdragon, Surface Pro X) | `Ampello_<version>_arm64-setup.exe` |
+| x64 | `Ampello_<version>_x64-setup.exe` |
+| ARM64 | `Ampello_<version>_arm64-setup.exe` |
 
-The installer asks whether to install for the current user only (no
-administrator rights required) or for all users on the machine. A portable
-executable is published alongside the installers if you would rather not
-install anything.
+The installer offers two installation scopes. A per-user installation requires
+no elevated privileges. A machine-wide installation requires administrator
+rights and makes the application available to every account. Portable
+executables are published alongside the installers.
 
 > **Note**
-> Release binaries are not code-signed, so Windows SmartScreen will warn the
-> first time you run one. Choose *More info* then *Run anyway*, verify the
+> Release binaries are unsigned, so Windows SmartScreen displays a warning on
+> first execution. Select *More info* followed by *Run anyway*, verify the
 > download against the published `SHA256SUMS`, or build from source.
 
 ### Requirements
 
-Windows 10 (up to date) or Windows 11. The WebView2 runtime ships with both.
+Windows 10 (current servicing baseline) or Windows 11. The WebView2 runtime is
+included with both.
 
 ## Usage
 
-Triggers fire when you finish them. Typing `:email` does nothing on its own;
-`:email` followed by a space, a full stop, Tab or Enter expands it. Ampello
-swallows that final keystroke, erases the trigger, inserts the content, then
-sends the keystroke through, so `:email.` keeps its full stop.
+A trigger is evaluated once it has been terminated. Typing `:email` has no
+effect on its own; expansion occurs when the trigger is followed by a space, a
+full stop, Tab or Enter. Ampello suppresses that terminating keystroke, removes
+the trigger, inserts the replacement content, then forwards the original
+keystroke, so `:email.` retains its trailing punctuation.
 
-Word boundaries are respected by default, so `something:sig` is left alone. You
-can turn that off in Settings.
+Triggers are matched at word boundaries by default, so `something:sig` is not
+expanded. This behaviour can be disabled in Settings.
 
-### Sharing a library between accounts
+### Shared libraries
 
-Every Windows account keeps its own library, private to that account. On a
-shared machine you can point several accounts at one folder:
+Each Windows account maintains an independent library. On a shared machine,
+several accounts may be configured to use a common directory:
 
-1. Open **Settings → Data → Location** and choose **Share**.
-2. Pick a folder every account can reach. `C:\Users\Public\Ampello` is offered
-   by default because Windows makes it writable by all accounts.
-3. Restart Ampello, then repeat on each account that should join.
+1. Open **Settings → Data → Location** and select **Share**.
+2. Choose a directory accessible to every participating account.
+   `C:\Users\Public\Ampello` is proposed by default, as Windows grants write
+   access to all accounts there without further configuration.
+3. Restart Ampello and repeat the procedure for each account.
 
-Nothing is shared until an account is pointed at the folder. Selecting **Use
-personal** returns that account to its own library and leaves the shared one
-untouched.
+No data is shared until an account is explicitly configured to use the shared
+directory. Selecting **Use personal** returns that account to its own library
+and leaves the shared one unmodified.
 
-Snippets are not copied between libraries; use Export and Import to move them.
-A running instance does not pick up another account's edits until it restarts,
-which matters only when two accounts are signed in at once. Keep the folder on
-a local disk, because SQLite's write-ahead log is not reliable over a network
-share.
+Three constraints apply. Snippets are not copied between libraries; use Export
+and Import to transfer them. A running instance does not observe changes made
+by another account until it restarts, which is relevant only when several
+accounts are signed in concurrently. The directory must reside on a local
+volume, as SQLite's write-ahead log is not reliable over network shares.
 
-### Where data is stored
+### Data locations
 
-| | |
+| Item | Path |
 | --- | --- |
 | Library | `%APPDATA%\com.yohann.ampello\ampello.db` |
-| Attachments | `attachments\` beside the library |
-| Log | shown in Settings → Data |
+| Attachments | `attachments\` adjacent to the library |
+| Log | reported in Settings → Data |
 
-Attachments are stored by the SHA-256 of their contents, so the same file used
-by ten snippets is stored once.
+Attachments are content-addressed by SHA-256, so a file referenced by several
+snippets is stored once.
 
 ## Building from source
 
 | Requirement | Notes |
 | --- | --- |
-| Node.js 20 or newer | `node --version` |
+| Node.js 20 or later | `node --version` |
 | Rust, stable toolchain | target `x86_64-pc-windows-msvc` |
-| Visual Studio Build Tools | with "Desktop development with C++" |
+| Visual Studio Build Tools | including "Desktop development with C++" |
 
 ```bash
 git clone https://github.com/ampello/ampello.git
@@ -139,13 +149,13 @@ npm install
 npm run tauri dev
 ```
 
-To produce an installer:
+To produce a distributable installer:
 
 ```bash
 npm run tauri build
 ```
 
-The full check suite:
+The complete verification suite:
 
 ```bash
 npm run typecheck
@@ -155,56 +165,58 @@ cargo check --manifest-path src-tauri/Cargo.toml
 ```
 
 > **Note**
-> Close Ampello before building. A running instance holds
-> `src-tauri/target/release/ampello.exe` open and the build fails with
-> `Access is denied. (os error 5)`. Quit it from the tray, or run
+> Close Ampello before building. A running instance retains a handle on
+> `src-tauri/target/release/ampello.exe`, and the build terminates with
+> `Access is denied. (os error 5)`. Exit from the tray icon, or run
 > `Stop-Process -Name ampello`.
 
 > **Note**
-> `tauri-build` does not watch the icon files. After changing artwork, run
-> `cargo clean -p ampello` first, or the build will keep the previous icon
-> without reporting anything.
+> `tauri-build` does not declare a dependency on the icon files. After
+> replacing artwork, run `cargo clean -p ampello`; otherwise the build retains
+> the previous icon without reporting an error.
 
 ## Project structure
 
 ```
 src/                     React and TypeScript interface
-  lib/                   types and the typed IPC boundary
+  lib/                   shared types and the typed IPC boundary
   stores/                application state
   views/                 dashboard, snippets, settings, editor
 
 src-tauri/
-  src/                   window, tray, commands, Windows input
+  src/                   window management, tray, commands, Windows input
     library.rs           personal and shared library resolution
     input/win/           keyboard hook, injector, clipboard
   crates/ampello-core/   platform-independent core
     attachments.rs       content-addressed attachment store
-    engine/              boundary rules, buffer, trigger matcher
+    engine/              boundary rules, input buffer, trigger matcher
     db/                  schema, migrations, settings
 ```
 
-`ampello-core` has no Tauri dependency. It compiles and is tested on any
-platform, which keeps a future macOS or Linux port from becoming a rewrite and
-allows the storage and matching logic to be tested without a window.
+`ampello-core` carries no dependency on Tauri or the Windows API. It compiles
+and is tested on any platform, which keeps a future macOS or Linux port from
+requiring a rewrite and allows the storage and matching logic to be tested
+without a graphical environment.
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how a keystroke becomes an
-expansion, and [docs/TESTING.md](docs/TESTING.md) for the manual test plan.
+Refer to [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the expansion
+pipeline and to [docs/TESTING.md](docs/TESTING.md) for the manual test plan.
 
 ## Known limitations
 
-These follow from how Windows handles input, and none of them can be detected
-in advance.
+The following are consequences of the Windows input model and cannot be
+detected programmatically in advance.
 
-* **Elevated windows.** A normal process cannot observe or send keystrokes to a
-  window running as administrator. Ampello must be elevated as well.
-* **Secure input fields.** UAC prompts, the lock screen and some password
-  managers are deliberately invisible to keyboard hooks.
-* **Anti-cheat software and some games** read input below the hook layer, or
-  reject synthetic input entirely.
-* **Applications that ignore Ctrl+V**, such as older console hosts. Set
+* **Elevated windows.** A process running at standard integrity cannot observe
+  or inject keystrokes for a window running as administrator. Ampello must be
+  elevated to operate in such windows.
+* **Protected input contexts.** UAC prompts, the lock screen and certain
+  password managers are deliberately inaccessible to keyboard hooks.
+* **Anti-cheat software and some games** intercept input below the hook layer
+  or reject synthetic input entirely.
+* **Applications that do not honour Ctrl+V**, such as older console hosts. Set
   Settings → Expansion → Insertion method to *Type*.
-* **Attachments in plain text fields.** A field with no paste handler for files
-  accepts nothing, without reporting an error.
+* **Attachments in plain text fields.** A field without a file paste handler
+  accepts nothing and reports no error.
 
 Verified against Notepad, Notepad++, Chrome, Visual Studio Code, Windows
 Terminal, Discord, Word, Slack and File Explorer.
@@ -212,17 +224,19 @@ Terminal, Discord, Word, Slack and File Explorer.
 ## Contributing
 
 Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md)
-first, and open an issue before starting anything larger than a bug fix.
+before submitting changes, and open an issue to discuss anything beyond a bug
+fix.
 
 ## Security
 
-Ampello observes every keystroke while it runs. Please report security issues
-privately rather than in a public issue. See [SECURITY.md](SECURITY.md) for the
-reporting process and for a description of what the application can see.
+Ampello observes all keyboard input while running. Report security issues
+privately rather than through the public issue tracker. See
+[SECURITY.md](SECURITY.md) for the disclosure process and for a description of
+what the application can access.
 
 ## License
 
-Ampello is released under the
+Ampello is distributed under the
 [GNU General Public License v3.0 or later](LICENSE).
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY

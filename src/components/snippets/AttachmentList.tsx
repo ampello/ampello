@@ -177,9 +177,7 @@ export function AttachmentList({
           <div id={panelId} className="border-t border-border">
             {attachments.length === 0 ? (
               <p className="px-3 py-2.5 text-[12.5px] text-muted">
-                Any kind of file: an image, a PDF, a document, an archive. They
-                are handed to whatever you are typing in, which attaches or
-                uploads them if it can.
+                No files attached.
               </p>
             ) : (
               <>
