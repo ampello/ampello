@@ -4,7 +4,7 @@
 
 # Ampello
 
-**A fast, privacy-respecting text expander for Windows.**
+**A privacy-first, cross-platform snippet expansion tool**
 
 [![License](https://img.shields.io/badge/license-GPLv3-6135e8.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/ampello/ampello?color=6135e8)](https://github.com/ampello/ampello/releases)
@@ -153,6 +153,12 @@ npm run build
 cargo test  --manifest-path src-tauri/crates/ampello-core/Cargo.toml
 cargo check --manifest-path src-tauri/Cargo.toml
 ```
+
+> **Note**
+> Close Ampello before building. A running instance holds
+> `src-tauri/target/release/ampello.exe` open and the build fails with
+> `Access is denied. (os error 5)`. Quit it from the tray, or run
+> `Stop-Process -Name ampello`.
 
 > **Note**
 > `tauri-build` does not watch the icon files. After changing artwork, run
