@@ -9,7 +9,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main
         className={
           "relative flex min-w-0 flex-1 flex-col overflow-hidden " +
-          "rounded-l-[14px] border-l border-border bg-bg shadow-[var(--shadow-sm)]"
+          "rounded-l-[14px] border-l border-border bg-bg"
         }
       >
         {children}

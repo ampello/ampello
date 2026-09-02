@@ -27,7 +27,8 @@ export function Switch({ label, checked, onChange, disabled = false }: SwitchPro
     >
       <span
         className={cn(
-          "block h-[18px] w-[18px] rounded-full bg-white shadow-[var(--shadow-sm)]",
+          "block h-[18px] w-[18px] rounded-full shadow-[var(--shadow-sm)]",
+          checked ? "bg-accent-contrast" : "bg-knob-off",
           "transition-transform duration-200 ease-[var(--ease-out)]",
           checked ? "translate-x-[21px]" : "translate-x-[3px]",
         )}

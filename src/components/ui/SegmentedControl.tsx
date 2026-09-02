@@ -40,7 +40,7 @@ export function SegmentedControl<T extends string>({
               "inline-flex h-7 items-center gap-1.5 rounded-[5px] px-2.5",
               "text-[12.5px] font-medium transition-colors duration-150",
               selected
-                ? "bg-surface text-primary shadow-[var(--shadow-sm)]"
+                ? "bg-raised text-primary shadow-[var(--shadow-sm)]"
                 : "text-secondary hover:text-primary",
             )}
           >

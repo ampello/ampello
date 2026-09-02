@@ -18,95 +18,99 @@
 [data-theme="light"] {
   color-scheme: light;
 
-  --bg: #faf9f5;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f2f0e9;
-  --surface-3: #e9e6dc;
-  --surface-inset: #fdfcf9;
-  --sidebar: #f0ecdf;
+  --surface-2: #f4f4f5;
+  --surface-3: #e9e9ec;
+  --surface-inset: #fafafa;
+  --sidebar: #f7f7f8;
 
-  --border: #e8e5da;
-  --border-strong: #d5d1c2;
+  --border: #e7e7ea;
+  --border-strong: #d3d3d8;
 
-  --text-primary: #191813;
-  --text-secondary: #6a675d;
-  --text-muted: #97938a;
-  --text-inverted: #faf9f5;
+  --text-primary: #18181b;
+  --text-secondary: #6c6c75;
+  --text-muted: #84848e;
+  --text-inverted: #ffffff;
 
-  --accent: #6135e8;
-  --accent-hover: #5429d1;
-  --accent-active: #4922b4;
-  --accent-soft: #eeeafd;
-  --accent-soft-hover: #e2dbfb;
+  --accent: #18181b;
+  --accent-hover: #2f2f34;
+  --accent-active: #45454b;
+  --accent-soft: #f0f0f2;
+  --accent-soft-hover: #e7e7ea;
   --accent-contrast: #ffffff;
+  --knob-off: #ffffff;
+  --raised: #ffffff;
 
-  --danger: #c2453a;
-  --danger-hover: #a83a30;
-  --danger-soft: #fbeceb;
-  --success: #2f7d55;
-  --success-soft: #eaf4ee;
-  --warning: #a9741a;
-  --warning-soft: #fbf2e3;
+  --danger: #b42318;
+  --danger-hover: #912018;
+  --danger-soft: #fef3f2;
+  --success: #067647;
+  --success-soft: #ecfdf3;
+  --warning: #b54708;
+  --warning-soft: #fffaeb;
 
-  --overlay: rgba(32, 28, 18, 0.32);
-  --shadow-sm: 0 1px 2px rgba(40, 34, 20, 0.05);
-  --shadow-md: 0 1px 3px rgba(40, 34, 20, 0.04), 0 6px 18px rgba(40, 34, 20, 0.06);
-  --shadow-lg: 0 2px 8px rgba(40, 34, 20, 0.05), 0 18px 44px rgba(40, 34, 20, 0.11);
+  --overlay: rgba(24, 24, 27, 0.32);
+  --shadow-sm: 0 1px 2px rgba(16, 16, 20, 0.05);
+  --shadow-md: 0 1px 3px rgba(16, 16, 20, 0.05), 0 6px 18px rgba(16, 16, 20, 0.06);
+  --shadow-lg: 0 2px 8px rgba(16, 16, 20, 0.06), 0 18px 44px rgba(16, 16, 20, 0.12);
 
-  --selection: rgba(97, 53, 232, 0.18);
+  --selection: rgba(24, 24, 27, 0.13);
 
   /* The close button keeps Windows' own convention rather than Ampello's
      accent, because that is the one control everybody already knows. */
   --titlebar-close: #c42b1c;
   --titlebar-close-text: #ffffff;
-  --editor-gutter: #97938a;
-  --editor-active-line: rgba(97, 53, 232, 0.05);
+  --editor-gutter: #84848e;
+  --editor-active-line: rgba(24, 24, 27, 0.035);
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #1f1e1c;
-  --surface: #292826;
-  --surface-2: #333230;
-  --surface-3: #403f3b;
-  --surface-inset: #1a1917;
-  --sidebar: #151412;
+  --bg: #1c1c1f;
+  --surface: #242427;
+  --surface-2: #2e2e33;
+  --surface-3: #3a3a40;
+  --surface-inset: #18181a;
+  --sidebar: #161618;
 
-  --border: #3a3936;
-  --border-strong: #4e4d48;
+  --border: #333338;
+  --border-strong: #48484f;
 
-  --text-primary: #f5f4ee;
-  --text-secondary: #b0ada2;
-  --text-muted: #817e74;
-  --text-inverted: #1f1e1c;
+  --text-primary: #f4f4f5;
+  --text-secondary: #a9a9b2;
+  --text-muted: #86868f;
+  --text-inverted: #18181b;
 
-  --accent: #a48ffa;
-  --accent-hover: #b19ffb;
-  --accent-active: #beb0fc;
-  --accent-soft: #2a2450;
-  --accent-soft-hover: #332c5e;
-  --accent-contrast: #16123a;
+  --accent: #f4f4f5;
+  --accent-hover: #ffffff;
+  --accent-active: #e4e4e7;
+  --accent-soft: #2e2e33;
+  --accent-soft-hover: #3a3a40;
+  --accent-contrast: #18181b;
+  --knob-off: #c8c8cf;
+  --raised: #3f3f46;
 
-  --danger: #e0695c;
-  --danger-hover: #e87b6f;
-  --danger-soft: #38201d;
-  --success: #62b78a;
-  --success-soft: #1a2f24;
-  --warning: #d3a459;
-  --warning-soft: #33280f;
+  --danger: #f97066;
+  --danger-hover: #fda29b;
+  --danger-soft: #3a1b18;
+  --success: #47cd89;
+  --success-soft: #16281f;
+  --warning: #f5b544;
+  --warning-soft: #2e2411;
 
   --overlay: rgba(0, 0, 0, 0.55);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.32), 0 8px 20px rgba(0, 0, 0, 0.34);
   --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.34), 0 20px 44px rgba(0, 0, 0, 0.46);
 
-  --selection: rgba(164, 143, 250, 0.26);
+  --selection: rgba(244, 244, 245, 0.20);
 
   --titlebar-close: #e81123;
   --titlebar-close-text: #ffffff;
-  --editor-gutter: #817e74;
-  --editor-active-line: rgba(164, 143, 250, 0.06);
+  --editor-gutter: #86868f;
+  --editor-active-line: rgba(244, 244, 245, 0.045);
 }
 
 @theme inline {
@@ -131,6 +135,8 @@
   --color-accent-soft: var(--accent-soft);
   --color-accent-soft-hover: var(--accent-soft-hover);
   --color-accent-contrast: var(--accent-contrast);
+  --color-knob-off: var(--knob-off);
+  --color-raised: var(--raised);
 
   --color-danger: var(--danger);
   --color-danger-hover: var(--danger-hover);
