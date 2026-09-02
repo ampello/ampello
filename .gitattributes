@@ -1,0 +1,30 @@
+# Normalise line endings so Windows and Linux contributors do not produce
+# whole-file diffs against each other. Text is LF in the repository and
+# checked out native; binaries are never touched.
+* text=auto
+
+*.rs      text eol=lf
+*.ts      text eol=lf
+*.tsx     text eol=lf
+*.json    text eol=lf
+*.toml    text eol=lf
+*.css     text eol=lf
+*.html    text eol=lf
+*.md      text eol=lf
+*.yml     text eol=lf
+*.yaml    text eol=lf
+
+# Windows tooling reads these directly.
+*.nsi     text eol=crlf
+*.bat     text eol=crlf
+*.cmd     text eol=crlf
+*.ps1     text eol=crlf
+
+*.png     binary
+*.ico     binary
+*.icns    binary
+*.exe     binary
+
+# Keep generated lockfiles out of pull-request diffs on GitHub.
+package-lock.json  linguist-generated=true
+Cargo.lock         linguist-generated=true
