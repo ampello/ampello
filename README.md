@@ -4,7 +4,7 @@
 
 # Ampello
 
-**A privacy-first, cross-platform snippet expansion tool**
+**A privacy-first text expander for Windows**
 
 [![License](https://img.shields.io/badge/license-GPLv3-6135e8.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/ampello/ampello?color=6135e8)](https://github.com/ampello/ampello/releases)
@@ -227,18 +227,8 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md)
 before submitting changes, and open an issue to discuss anything beyond a bug
 fix.
 
-## Security
-
-Ampello observes all keyboard input while running. Report security issues
-privately rather than through the public issue tracker. See
-[SECURITY.md](SECURITY.md) for the disclosure process and for a description of
-what the application can access.
 
 ## License
 
-Ampello is distributed under the
 [GNU General Public License v3.0 or later](LICENSE).
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE.
+Ampello was created by Yohann Joachim Zapata  
