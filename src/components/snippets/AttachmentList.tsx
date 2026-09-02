@@ -49,7 +49,7 @@ export function AttachmentList({
     return (
       <section
         className={cn(
-          "mt-3 flex shrink-0 items-center gap-2 rounded-[10px] border border-dashed px-3 py-2",
+          "mt-3 flex shrink-0 items-center gap-2 rounded-[12px] border border-dashed px-3 py-2",
           dragging ? "border-border-strong bg-surface-2" : "border-border",
         )}
       >
@@ -117,7 +117,7 @@ export function AttachmentList({
 
       <div
         className={cn(
-          "overflow-hidden rounded-[10px] border bg-surface transition-colors duration-100",
+          "overflow-hidden rounded-[12px] border bg-surface transition-colors duration-150",
           dragging ? "border-accent" : "border-border",
         )}
       >
@@ -128,8 +128,8 @@ export function AttachmentList({
             aria-controls={panelId}
             onClick={() => setOpen((value) => !value)}
             className={cn(
-              "flex h-7 min-w-0 flex-1 items-center gap-2 rounded-[6px] px-1.5 text-left",
-              "transition-colors duration-100 hover:bg-surface-2",
+              "flex h-7 min-w-0 flex-1 items-center gap-2 rounded-[8px] px-1.5 text-left",
+              "transition-colors duration-150 hover:bg-surface-2",
               "focus-visible:outline-2 focus-visible:outline-accent",
             )}
           >
@@ -304,11 +304,11 @@ function Tile({
     <div
       className={cn(
         "group/tile relative shrink-0 overflow-hidden rounded-[8px] border bg-surface-2",
-        "h-[76px] transition-colors duration-100",
+        "h-[76px] transition-colors duration-150",
         image ? "w-[76px]" : "w-[188px]",
         attachment.present ? "border-border" : "border-danger/45",
       )}
-      title={`${index + 1}. ${attachment.name} — ${formatSize(attachment.sizeBytes)}`}
+      title={`${index + 1}. ${attachment.name} (${formatSize(attachment.sizeBytes)})`}
     >
       {image ? (
         <img
@@ -332,7 +332,7 @@ function Tile({
       )}
       <span
         className={cn(
-          "absolute left-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-[4px] px-1",
+          "absolute left-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-[6px] px-1",
           "text-[10px] font-semibold tabular-nums",
           image
             ? "bg-black/55 text-white backdrop-blur-[2px]"
@@ -344,7 +344,7 @@ function Tile({
 
       {!attachment.present ? (
         <span
-          className="absolute right-1 top-1 flex items-center gap-1 rounded-[4px] bg-danger-soft px-1 py-0.5 text-[9.5px] font-medium text-danger"
+          className="absolute right-1 top-1 flex items-center gap-1 rounded-[6px] bg-danger-soft px-1 py-0.5 text-[9.5px] font-medium text-danger"
           title="This file is no longer in Ampello's library and will be skipped."
         >
           <AlertTriangle size={9} strokeWidth={2.25} />
@@ -354,7 +354,7 @@ function Tile({
       <div
         className={cn(
           "absolute inset-x-0 bottom-0 flex items-center justify-center gap-0.5 py-0.5",
-          "bg-surface/92 backdrop-blur-[2px] opacity-0 transition-opacity duration-100",
+          "bg-surface/92 backdrop-blur-[2px] opacity-0 transition-opacity duration-150",
           "group-hover/tile:opacity-100 focus-within:opacity-100",
         )}
       >
@@ -405,7 +405,7 @@ function TileButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "flex h-5 w-5 items-center justify-center rounded-[4px] transition-colors duration-100",
+        "flex h-5 w-5 items-center justify-center rounded-[6px] transition-colors duration-150",
         "text-secondary hover:bg-surface-3 hover:text-primary",
         "focus-visible:outline-2 focus-visible:outline-accent",
         "disabled:pointer-events-none disabled:opacity-35",

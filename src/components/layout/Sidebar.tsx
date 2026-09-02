@@ -40,7 +40,7 @@ export function Sidebar() {
     <nav
       aria-label="Primary"
       className={cn(
-        "flex h-full shrink-0 flex-col overflow-hidden border-r border-border bg-surface-2",
+        "flex h-full shrink-0 flex-col overflow-hidden bg-sidebar",
 
         "transition-[width] duration-[240ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
         collapsed ? "w-[56px]" : "w-[228px]",
@@ -269,11 +269,11 @@ function NavItem({
         title={collapsed ? label : undefined}
         aria-current={active ? "page" : undefined}
         className={cn(
-          "flex h-[30px] w-full items-center gap-2.5 overflow-hidden rounded-[6px] px-2",
-          "text-[13px] font-medium transition-colors duration-100",
+          "flex h-[30px] w-full items-center gap-2.5 overflow-hidden rounded-[8px] px-2",
+          "text-[13px] font-medium transition-colors duration-150",
           active
             ? "bg-accent-soft text-accent"
-            : "text-secondary hover:bg-surface-3 hover:text-primary",
+            : "text-secondary hover:bg-surface-2 hover:text-primary",
         )}
       >
         <Icon
@@ -298,7 +298,7 @@ function NavItem({
         ) : null}
       </button>
       {menu ? (
-        <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-100 group-hover:opacity-100 focus-within:opacity-100">
+        <div className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-within:opacity-100">
           {menu}
         </div>
       ) : null}
@@ -341,7 +341,7 @@ function InlineNameInput({
           onCancel();
         }
       }}
-      className="h-[30px] w-full rounded-[6px] border border-accent bg-surface px-2 text-[13px] text-primary focus:outline-none"
+      className="h-[30px] w-full rounded-[8px] border border-accent bg-surface px-2 text-[13px] text-primary focus:outline-none"
     />
   );
 }

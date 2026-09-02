@@ -184,7 +184,7 @@ export function SettingsView() {
       <main className="flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-[840px] px-8 py-9">
           {error ? (
-            <div className="mb-7 overflow-hidden rounded-[10px] border border-border">
+            <div className="mb-7 overflow-hidden rounded-[12px] border border-border">
               <Notice tone="danger">{error}</Notice>
             </div>
           ) : null}
@@ -299,7 +299,7 @@ export function SettingsView() {
                         ),
                       });
                     }}
-                    className="h-8 w-[86px] rounded-[6px] border border-border bg-surface px-2 text-right text-[13px] tabular-nums text-primary focus:border-accent focus:outline-none"
+                    className="h-8 w-[86px] rounded-[8px] border border-border bg-surface px-2 text-right text-[13px] tabular-nums text-primary focus:border-accent focus:outline-none"
                     aria-label="Attachment delay in milliseconds"
                   />
                   <span className="text-[12.5px] text-muted">ms</span>
@@ -523,7 +523,7 @@ export function SettingsView() {
 
             <SettingsBlock>
               <details className="group">
-                <summary className="cursor-pointer list-none text-[12.5px] text-secondary transition-colors duration-100 hover:text-primary">
+                <summary className="cursor-pointer list-none text-[12.5px] text-secondary transition-colors duration-150 hover:text-primary">
                   <span className="underline decoration-border underline-offset-4">
                     Where things are kept
                   </span>
@@ -595,7 +595,7 @@ function ImportSummary({ report }: { report: ImportReport }) {
   ].filter(Boolean);
 
   return (
-    <div className="rounded-[6px] border border-border bg-surface-2 px-3 py-2.5">
+    <div className="rounded-[8px] border border-border bg-surface-2 px-3 py-2.5">
       <p className="text-[12.5px] text-primary">{parts.join(" · ")}</p>
       {report.problems.length > 0 ? (
         <ul className="mt-1.5 space-y-0.5">

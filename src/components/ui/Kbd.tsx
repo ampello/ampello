@@ -8,7 +8,7 @@ export function Kbd({ keys, className }: { keys: string; className?: string }) {
         <kbd
           key={key}
           className={cn(
-            "min-w-[18px] rounded-[4px] border border-border bg-surface-2 px-1",
+            "min-w-[18px] rounded-[6px] border border-border bg-surface-2 px-1",
             "text-center font-sans text-[10.5px] leading-[17px] text-muted",
           )}
         >

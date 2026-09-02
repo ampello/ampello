@@ -10,7 +10,7 @@ export function BootErrorView({ message, onRetry }: { message: string; onRetry: 
         aria-hidden="true"
       />
       <div className="max-w-[440px] text-center">
-        <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-[10px] border border-border bg-danger-soft text-danger">
+        <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-[12px] border border-border bg-danger-soft text-danger">
           <TriangleAlert size={18} strokeWidth={1.75} />
         </div>
         <p className="text-[14px] font-medium text-primary">Ampello could not start</p>
@@ -18,7 +18,7 @@ export function BootErrorView({ message, onRetry }: { message: string; onRetry: 
         <button
           type="button"
           onClick={onRetry}
-          className="mt-5 inline-flex h-8 items-center rounded-[6px] bg-accent px-3 text-[13px] font-medium text-accent-contrast hover:bg-accent-hover"
+          className="mt-5 inline-flex h-8 items-center rounded-[8px] bg-accent px-3 text-[13px] font-medium text-accent-contrast hover:bg-accent-hover"
         >
           Try again
         </button>

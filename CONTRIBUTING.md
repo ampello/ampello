@@ -6,7 +6,7 @@ welcome.
 ## Before you start
 
 For anything larger than a bug fix, **open an issue first**. Ampello has a
-deliberately narrow design — described below — and a pull request that works
+deliberately narrow design, described below, and a pull request that works
 against it is a waste of your time and ours.
 
 ## Getting set up
@@ -29,7 +29,7 @@ cargo check --manifest-path src-tauri/Cargo.toml
 ```
 
 Anything touching the keyboard hook, the injector or the clipboard also needs a
-manual pass — see [docs/TESTING.md](docs/TESTING.md). Those paths cannot be
+manual pass. See [docs/TESTING.md](docs/TESTING.md). Those paths cannot be
 covered by automated tests, because they depend on how other applications
 behave.
 
@@ -53,7 +53,7 @@ Ampello stores text and replays text. Please do not propose:
 Match what is already there rather than introducing a new pattern.
 
 **Comments are rare on purpose.** Write one only where the code cannot say it
-itself — a Windows quirk, a constraint that a reasonable change would break, a
+itself: a Windows quirk, a constraint that a reasonable change would break, or a
 security boundary. Do not write comments that restate the line below them.
 
 **Platform code stays out of the core.** `ampello-core` has no Tauri and no
@@ -69,17 +69,17 @@ touching the hook, injection, the clipboard or the tray belongs in
 
 ## Commits and pull requests
 
-Write commit subjects in the imperative — "Fix trigger matching across word
-boundaries", not "Fixed…". Explain *why* in the body when it is not obvious.
+Write commit subjects in the imperative, such as "Fix trigger matching across
+word boundaries" rather than "Fixed...". Explain *why* in the body when it is not obvious.
 
-Keep a pull request to one change. Say what you tested and on what — Windows
+Keep a pull request to one change. Say what you tested and on what: Windows
 version, and which target applications if you touched the input path.
 
 ## Reporting bugs
 
 Include your Windows version, your Ampello version, the application you were
 typing into, and what you expected against what happened. If expansion stopped
-working entirely, Settings → Expansion shows the keystroke counter — a stalled
+working entirely, Settings → Expansion shows the keystroke counter. A stalled
 counter means Windows removed the hook, which is a different bug from a trigger
 that does not match.
 

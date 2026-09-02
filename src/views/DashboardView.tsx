@@ -152,7 +152,7 @@ function StatusCard({
   }
 
   return (
-    <section className="divide-y divide-border overflow-hidden rounded-[10px] border border-border bg-surface">
+    <section className="divide-y divide-border overflow-hidden rounded-[12px] border border-border bg-surface">
       <div
         className={cn(
           "flex items-center gap-3 px-4 py-3.5",
@@ -231,7 +231,7 @@ function SnippetCard({
       <h3 className="mb-2 px-1 text-[11px] font-medium uppercase tracking-[0.06em] text-muted">
         {title}
       </h3>
-      <div className="overflow-hidden rounded-[10px] border border-border bg-surface">
+      <div className="overflow-hidden rounded-[12px] border border-border bg-surface">
         {snippets.length === 0 ? (
           <p className="px-4 py-3.5 text-[12.5px] leading-relaxed text-muted">{empty}</p>
         ) : (
@@ -243,7 +243,7 @@ function SnippetCard({
                   onClick={() => onOpen(snippet.id)}
                   className={cn(
                     "flex w-full items-baseline gap-2.5 px-4 py-2.5 text-left",
-                    "transition-colors duration-100 hover:bg-surface-2",
+                    "transition-colors duration-150 hover:bg-surface-2",
                   )}
                 >
                   <span
@@ -276,7 +276,7 @@ function GettingStarted({ onCreate }: { onCreate: () => void }) {
       <h3 className="mb-2 px-1 text-[11px] font-medium uppercase tracking-[0.06em] text-muted">
         Getting started
       </h3>
-      <div className="divide-y divide-border overflow-hidden rounded-[10px] border border-border bg-surface">
+      <div className="divide-y divide-border overflow-hidden rounded-[12px] border border-border bg-surface">
         <Step
           number={1}
           title="Write a snippet"

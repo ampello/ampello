@@ -1,212 +1,224 @@
 <div align="center">
 
-<img src="src-tauri/icons/128x128.png" width="96" height="96" alt="">
+<img src="src-tauri/icons/128x128.png" width="88" height="88" alt="Ampello">
 
 # Ampello
 
-**Universal text expansion for Windows.**
-You tell Ampello *when I type this, put this there* — and nothing else.
+**A fast, privacy-respecting text expander for Windows.**
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-6135e8.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-6135e8.svg)](#requirements)
+[![License](https://img.shields.io/badge/license-GPLv3-6135e8.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/ampello/ampello?color=6135e8)](https://github.com/ampello/ampello/releases)
-[![Build](https://github.com/ampello/ampello/actions/workflows/ci.yml/badge.svg)](https://github.com/ampello/ampello/actions/workflows/ci.yml)
+[![CI](https://github.com/ampello/ampello/actions/workflows/ci.yml/badge.svg)](https://github.com/ampello/ampello/actions/workflows/ci.yml)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-6135e8.svg)](#requirements)
+
+[Installation](#installation) · [Features](#features) · [Documentation](docs/ARCHITECTURE.md) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
 ---
 
-Type a short trigger anywhere on your machine — a browser, an editor, a chat
-box — and Ampello replaces it with whatever you said it stands for: a
-signature, a paragraph, a page of code, a set of files, or all of those at once.
+## What is Ampello?
+
+Ampello watches for short abbreviations as you type and replaces them with
+longer content. It works in every application on your machine: browsers, code
+editors, chat clients, email, terminals.
+
+You define a trigger and the content it stands for. When you finish typing the
+trigger, Ampello removes it and inserts the content in its place.
 
 ```
-TRIGGER  →  CONTENT
-:email      Hello,
-            Thank you for reaching out.
-            …
+:email      →   Hello,
+                Thank you for reaching out.
+                Best regards,
+                Yohann
 
-:report     See the attached.
-            📎 contract.pdf  📎 figures.xlsx  📎 chart.png
+:report     →   See the attached files.
+                📎 contract.pdf   📎 figures.xlsx   📎 chart.png
 ```
 
 A snippet is a trigger, a body of text, and any files that go with it. Ampello
-never asks what kind of text it is, or what kind of file. One character or
-fifty thousand: identical at the data-model level. A PNG, a PDF and a `.docx`:
-likewise.
+does not ask what kind of text it is, or what kind of file. One character or
+fifty thousand are the same thing to the data model, as are a PNG, a PDF and a
+`.docx`.
 
-## Install
+## Features
 
-Download the installer from [Releases](https://github.com/ampello/ampello/releases)
-and run it. The installer asks whether to install:
+* **Works everywhere.** A system-wide keyboard hook, not a browser extension or
+  an editor plugin.
+* **File attachments.** A snippet can carry any files, delivered in the order
+  you choose. Chat prompts and web forms receive them as uploads.
+* **Fast.** Trigger matching costs about 31 ns per keystroke, measured on a
+  library of ten thousand snippets.
+* **Interruptible.** Press Escape while a long snippet is being inserted and it
+  stops where it is.
+* **Clipboard shortcut.** A second shortcut inserts the current clipboard as
+  keystrokes, for applications that refuse or reformat a paste.
+* **Local and private.** One SQLite file on your machine. No account, no sync,
+  no telemetry, and no network client of any kind.
+* **Shared libraries.** Accounts on the same machine can opt in to a shared
+  snippet folder. Private by default.
+* **Readable backups.** Exports are YAML you can diff and edit by hand.
 
-- **Just for me** — no administrator rights needed.
-- **For all users on this machine** — requires administrator rights.
+## Installation
 
-Either way, each Windows account gets its own private snippet library by
-default. See [Sharing a library](#sharing-a-library-between-accounts) to change
-that deliberately.
+Download the latest installer from the
+[releases page](https://github.com/ampello/ampello/releases) and run it.
 
-Builds are provided for **x64** and **ARM64**. The installers are not
-code-signed, so SmartScreen will warn on first run — choose *More info* →
-*Run anyway*, or build from source.
+| Architecture | File |
+| --- | --- |
+| x64 (most PCs) | `Ampello_<version>_x64-setup.exe` |
+| ARM64 (Snapdragon, Surface Pro X) | `Ampello_<version>_arm64-setup.exe` |
 
-## What it does
+The installer asks whether to install for the current user only (no
+administrator rights required) or for all users on the machine. A portable
+executable is published alongside the installers if you would rather not
+install anything.
 
-**Triggers fire when you finish them.** `:email` alone does nothing.
-`:email` followed by a space, full stop, Tab or Enter expands — Ampello
-swallows that key, erases the trigger, inserts the content, then sends the key
-back, so `:email.` keeps its full stop. Word boundaries are respected by
-default, so `something:sig` stays as typed.
+> **Note**
+> Release binaries are not code-signed, so Windows SmartScreen will warn the
+> first time you run one. Choose *More info* then *Run anyway*, verify the
+> download against the published `SHA256SUMS`, or build from source.
 
-**Snippets can carry files.** Any files. They are handed to whatever
-application you are typing in, which a browser turns into an upload and a chat
-prompt shows as an attachment. You set the order; there is a strict mode for
-applications that would otherwise reshuffle them.
+### Requirements
 
-**A clipboard shortcut for when pasting fails.** A second global combination
-inserts whatever is already on your clipboard, optionally as individual
-keystrokes rather than a paste. Ctrl+V itself is left untouched.
+Windows 10 (up to date) or Windows 11. The WebView2 runtime ships with both.
 
-**Escape stops an insertion.** A long snippet takes real time to deliver;
-pressing Escape halts it where it is.
+## Usage
 
-**Everything stays on your machine.** One SQLite file, no account, no sync, no
-telemetry. The log records what Ampello did, never what you typed.
+Triggers fire when you finish them. Typing `:email` does nothing on its own;
+`:email` followed by a space, a full stop, Tab or Enter expands it. Ampello
+swallows that final keystroke, erases the trigger, inserts the content, then
+sends the keystroke through, so `:email.` keeps its full stop.
 
-## Sharing a library between accounts
+Word boundaries are respected by default, so `something:sig` is left alone. You
+can turn that off in Settings.
 
-By default every Windows account has its own library, private to that account.
+### Sharing a library between accounts
 
-On a shared machine you can point two or more accounts at the same folder so
-they use the same snippets and attachments:
+Every Windows account keeps its own library, private to that account. On a
+shared machine you can point several accounts at one folder:
 
-1. **Settings → Data → Location → Share…**
-2. Choose a folder every account can reach — `C:\Users\Public\Ampello` is
-   offered by default because Windows makes it writable by all accounts.
-3. Restart Ampello.
-4. Repeat on each account that should join.
+1. Open **Settings → Data → Location** and choose **Share**.
+2. Pick a folder every account can reach. `C:\Users\Public\Ampello` is offered
+   by default because Windows makes it writable by all accounts.
+3. Restart Ampello, then repeat on each account that should join.
 
-Nothing is shared unless an account is pointed at the folder itself. Switching
-back is *Use personal*, and the shared library is left untouched.
+Nothing is shared until an account is pointed at the folder. Selecting **Use
+personal** returns that account to its own library and leaves the shared one
+untouched.
 
-Two things to know:
+Snippets are not copied between libraries; use Export and Import to move them.
+A running instance does not pick up another account's edits until it restarts,
+which matters only when two accounts are signed in at once. Keep the folder on
+a local disk, because SQLite's write-ahead log is not reliable over a network
+share.
 
-- **Snippets are not copied between libraries.** Use Export and Import to move
-  them.
-- **A running instance does not see another account's edits live.** Changes
-  made while you are signed in appear the next time Ampello starts. This
-  matters only if two accounts are signed in at once via fast user switching.
-- **Keep it on a local disk.** SQLite's write-ahead log does not work reliably
-  over a network share.
-
-## Where your data lives
+### Where data is stored
 
 | | |
 | --- | --- |
-| Personal library | `%APPDATA%\com.yohann.ampello\ampello.db` |
-| Attachments | `attachments\` beside the database |
-| Shared library | wherever you point it |
-| Log | shown in Settings → Data → *Where things are kept* |
+| Library | `%APPDATA%\com.yohann.ampello\ampello.db` |
+| Attachments | `attachments\` beside the library |
+| Log | shown in Settings → Data |
 
-Attachments are stored by the SHA-256 of their contents, so the same file on
-ten snippets is stored once. Backups are readable YAML you can diff and
-hand-edit; a library with attachments exports as a `.ampellozip` archive with
-that same document at its root and the files beside it.
+Attachments are stored by the SHA-256 of their contents, so the same file used
+by ten snippets is stored once.
 
-## Requirements
+## Building from source
 
-Windows 10 (up-to-date) or Windows 11. The WebView2 runtime is preinstalled on
-both.
-
-## Build from source
-
-| Tool | Notes |
+| Requirement | Notes |
 | --- | --- |
-| Node.js 20+ | `node --version` |
-| Rust (stable, `x86_64-pc-windows-msvc`) | `rustc --version` |
-| Visual Studio Build Tools, "Desktop development with C++" | needed by Tauri and SQLite's bundled C source |
+| Node.js 20 or newer | `node --version` |
+| Rust, stable toolchain | target `x86_64-pc-windows-msvc` |
+| Visual Studio Build Tools | with "Desktop development with C++" |
 
 ```bash
+git clone https://github.com/ampello/ampello.git
+cd ampello
 npm install
 npm run tauri dev
 ```
 
-The first build compiles the Tauri crates and takes a few minutes; afterwards
-it is fast.
+To produce an installer:
 
 ```bash
-npm run typecheck                                             # TypeScript
-npm run build                                                 # typecheck + bundle
-cargo test --manifest-path src-tauri/crates/ampello-core/Cargo.toml
+npm run tauri build
+```
+
+The full check suite:
+
+```bash
+npm run typecheck
+npm run build
+cargo test  --manifest-path src-tauri/crates/ampello-core/Cargo.toml
 cargo check --manifest-path src-tauri/Cargo.toml
-npm run tauri build                                           # NSIS installer
 ```
 
-> **Changing the app icon?** `tauri-build` does not watch the icon files, so
-> run `cargo clean -p ampello` first or the build will silently keep the old
-> one.
+> **Note**
+> `tauri-build` does not watch the icon files. After changing artwork, run
+> `cargo clean -p ampello` first, or the build will keep the previous icon
+> without reporting anything.
 
-## Project layout
+## Project structure
 
 ```
-src/                        React + TypeScript interface
-  index.css                 the design token system, both themes
-  lib/                      types and the single typed IPC boundary
-  stores/                   Zustand: settings, ui, data
-  views/                    dashboard, snippets, settings, editor
+src/                     React and TypeScript interface
+  lib/                   types and the typed IPC boundary
+  stores/                application state
+  views/                 dashboard, snippets, settings, editor
 
 src-tauri/
-  src/                      window, tray, commands, Windows input
-    library.rs              personal vs shared library resolution
-    input/win/              the keyboard hook, injector and clipboard
-  crates/ampello-core/      no platform dependency whatsoever
-    attachments.rs          content-addressed store for attached files
-    engine/                 boundary rules, rolling buffer, matcher
-    db/                     schema, migrations, CRUD, settings
+  src/                   window, tray, commands, Windows input
+    library.rs           personal and shared library resolution
+    input/win/           keyboard hook, injector, clipboard
+  crates/ampello-core/   platform-independent core
+    attachments.rs       content-addressed attachment store
+    engine/              boundary rules, buffer, trigger matcher
+    db/                  schema, migrations, settings
 ```
 
 `ampello-core` has no Tauri dependency. It compiles and is tested on any
-platform, which is what keeps a future macOS or Linux port from being a rewrite
-and lets the storage and matching logic be tested without a window.
+platform, which keeps a future macOS or Linux port from becoming a rewrite and
+allows the storage and matching logic to be tested without a window.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how a keystroke becomes an
-expansion, and [docs/TESTING.md](docs/TESTING.md) for the manual test pass.
+expansion, and [docs/TESTING.md](docs/TESTING.md) for the manual test plan.
 
-## Known limits
+## Known limitations
 
-All of these are Windows' rules rather than Ampello's, and none can be detected
+These follow from how Windows handles input, and none of them can be detected
 in advance.
 
-- **Elevated windows.** A normal-privilege process cannot see keystrokes going
-  to a window running as administrator, or send input to one. Ampello has to be
-  elevated too.
-- **Secure input fields.** UAC, the lock screen and some password managers are
-  deliberately invisible to hooks. That is a feature.
-- **Anti-cheat software and some games** read input below the hook layer, or
-  refuse synthetic input outright.
-- **Applications that ignore Ctrl+V**, such as older console hosts. Use
-  Settings → Expansion → Insertion method → Type.
-- **Attachments in a plain text box.** A field with no paste handler for files
-  takes nothing at all, silently.
+* **Elevated windows.** A normal process cannot observe or send keystrokes to a
+  window running as administrator. Ampello must be elevated as well.
+* **Secure input fields.** UAC prompts, the lock screen and some password
+  managers are deliberately invisible to keyboard hooks.
+* **Anti-cheat software and some games** read input below the hook layer, or
+  reject synthetic input entirely.
+* **Applications that ignore Ctrl+V**, such as older console hosts. Set
+  Settings → Expansion → Insertion method to *Type*.
+* **Attachments in plain text fields.** A field with no paste handler for files
+  accepts nothing, without reporting an error.
 
-Tested against Notepad, Notepad++, Chrome, VS Code, Windows Terminal, Discord,
-Word, Slack and Explorer's rename field.
+Verified against Notepad, Notepad++, Chrome, Visual Studio Code, Windows
+Terminal, Discord, Word, Slack and File Explorer.
 
 ## Contributing
 
-Bug reports and pull requests are welcome. See
-[CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md)
+first, and open an issue before starting anything larger than a bug fix.
 
 ## Security
 
-Ampello reads every keystroke on the machine, so please report security issues
-privately rather than in a public issue. See [SECURITY.md](SECURITY.md).
+Ampello observes every keystroke while it runs. Please report security issues
+privately rather than in a public issue. See [SECURITY.md](SECURITY.md) for the
+reporting process and for a description of what the application can see.
 
 ## License
 
+Ampello is released under the
 [GNU General Public License v3.0 or later](LICENSE).
 
-Ampello is free software: you may redistribute and modify it under the terms of
-the GPL. It comes with **no warranty**. If you distribute a modified version,
-you must release your changes under the same license.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.

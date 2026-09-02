@@ -13,7 +13,7 @@ running, and what an attacker could do with it. A proof of concept helps but is
 not required.
 
 You should get an acknowledgement within a week. Ampello is a small
-volunteer-maintained project, so please be patient with the fix itself — we
+volunteer-maintained project, so please be patient with the fix itself. We
 will keep you updated and credit you in the advisory unless you would rather we
 did not.
 
@@ -34,8 +34,8 @@ trigger in your library. It is discarded on every mouse click, arrow key,
 window change and shortcut. It is never written to disk.
 
 **What it never does.** Nothing you type is recorded, logged or transmitted.
-The log records what Ampello did — "expansion of snippet `<id>` failed" — never
-what you typed, and never a snippet's contents. There is no account, no sync,
+The log records what Ampello did, such as "expansion of snippet `<id>` failed",
+never what you typed and never a snippet's contents. There is no account, no sync,
 no telemetry and no network client of any kind.
 
 **What is on disk.** Your snippet library is a plain, unencrypted SQLite file
@@ -46,7 +46,7 @@ store passwords, recovery codes or secrets in snippets.**
 
 **Clipboard.** Pasting a snippet means putting it on the clipboard first.
 Ampello copies out the existing clipboard contents, replaces them, and puts
-them back afterwards. During that window — typically under a second — the
+them back afterwards. During that window, typically under a second, the
 snippet is readable by any other application on the machine, as is anything on
 the clipboard at any other time.
 

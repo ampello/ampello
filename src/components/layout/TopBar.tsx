@@ -15,13 +15,13 @@ export function TopBar({ title, meta, center, className }: TopBarProps) {
     <header
       data-tauri-drag-region
       className={cn(
-        "flex h-12 shrink-0 items-center gap-3 border-b border-border bg-bg",
-        "pl-4 pr-[158px]",
+        "flex h-12 shrink-0 items-center gap-3 border-b border-border/70",
+        "bg-bg/80 backdrop-blur-[6px] pl-5 pr-[158px]",
         className,
       )}
     >
       <div data-tauri-drag-region className="flex min-w-0 shrink-0 items-baseline gap-2">
-        <h1 className="truncate text-[13.5px] font-semibold tracking-[-0.005em] text-primary">
+        <h1 className="truncate text-[14px] font-semibold tracking-[-0.011em] text-primary">
           {title}
         </h1>
         {meta ? <span className="text-[12px] text-muted">{meta}</span> : null}

@@ -48,7 +48,7 @@ export function ConfirmDialog({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="motion-pop w-full max-w-[380px] rounded-[10px] border border-border bg-surface p-5 shadow-[var(--shadow-lg)]"
+        className="motion-pop w-full max-w-[380px] rounded-[12px] border border-border bg-surface p-5 shadow-[var(--shadow-lg)]"
       >
         <p className="text-[14px] font-semibold text-primary">{title}</p>
         {description ? (

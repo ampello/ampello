@@ -15,7 +15,7 @@ export function SettingsSection({
       <h3 className="mb-2 px-1 text-[11px] font-medium uppercase tracking-[0.06em] text-muted">
         {title}
       </h3>
-      <div className="divide-y divide-border overflow-hidden rounded-[10px] border border-border bg-surface">
+      <div className="divide-y divide-border overflow-hidden rounded-[12px] border border-border bg-surface">
         {children}
       </div>
     </section>

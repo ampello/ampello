@@ -253,7 +253,7 @@ export function EditorView({ id }: { id: string }) {
                 setCategoryId(event.target.value || null);
                 markFields();
               }}
-              className="h-8 w-full rounded-[6px] border border-border bg-surface px-2 text-[13px] text-primary focus:border-accent focus:outline-none"
+              className="h-8 w-full rounded-[8px] border border-border bg-surface px-2 text-[13px] text-primary focus:border-accent focus:outline-none"
             >
               <option value="">None</option>
               {categories.map((category) => (

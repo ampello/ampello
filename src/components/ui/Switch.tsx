@@ -18,17 +18,18 @@ export function Switch({ label, checked, onChange, disabled = false }: SwitchPro
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={cn(
-        "relative inline-flex h-[22px] w-[38px] shrink-0 items-center rounded-full",
-        "transition-colors duration-150",
-        "disabled:pointer-events-none disabled:opacity-45",
+        "relative inline-flex h-[24px] w-[42px] shrink-0 items-center rounded-full",
+        "transition-colors duration-200 ease-[var(--ease-out)]",
+        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+        "disabled:pointer-events-none disabled:opacity-40",
         checked ? "bg-accent" : "bg-surface-3 border border-border",
       )}
     >
       <span
         className={cn(
-          "block h-[16px] w-[16px] rounded-full bg-surface shadow-[var(--shadow-sm)]",
-          "transition-transform duration-150",
-          checked ? "translate-x-[19px]" : "translate-x-[3px]",
+          "block h-[18px] w-[18px] rounded-full bg-white shadow-[var(--shadow-sm)]",
+          "transition-transform duration-200 ease-[var(--ease-out)]",
+          checked ? "translate-x-[21px]" : "translate-x-[3px]",
         )}
       />
     </button>

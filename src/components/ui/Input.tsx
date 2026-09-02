@@ -17,12 +17,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       ref={ref}
       aria-invalid={invalid || undefined}
       className={cn(
-        "h-8 w-full rounded-[6px] border bg-surface px-2.5 text-[13px] text-primary",
-        "placeholder:text-muted transition-colors duration-100",
-        "focus:outline-none focus-visible:outline-none",
+        "h-9 w-full rounded-[8px] border bg-surface px-3 text-[13px] text-primary",
+        "placeholder:text-muted transition-[border-color,box-shadow] duration-150",
+        "ease-[var(--ease-out)] focus:outline-none focus-visible:outline-none",
         invalid
-          ? "border-danger focus:border-danger"
-          : "border-border focus:border-accent",
+          ? "border-danger focus:border-danger focus:shadow-[0_0_0_3px_var(--danger-soft)]"
+          : "border-border focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-soft)]",
         mono && "font-mono",
         className,
       )}

@@ -25,7 +25,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className="inline-flex items-center gap-0.5 rounded-[7px] border border-border bg-surface-2 p-0.5"
+      className="inline-flex items-center gap-0.5 rounded-[9px] border border-border bg-surface-2 p-0.5"
     >
       {options.map((option) => {
         const selected = option.value === value;
@@ -38,7 +38,7 @@ export function SegmentedControl<T extends string>({
             onClick={() => onChange(option.value)}
             className={cn(
               "inline-flex h-7 items-center gap-1.5 rounded-[5px] px-2.5",
-              "text-[12.5px] font-medium transition-colors duration-100",
+              "text-[12.5px] font-medium transition-colors duration-150",
               selected
                 ? "bg-surface text-primary shadow-[var(--shadow-sm)]"
                 : "text-secondary hover:text-primary",

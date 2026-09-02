@@ -48,9 +48,9 @@ export function SearchField({
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
         className={cn(
-          "h-8 w-full rounded-[6px] border border-border bg-surface pl-[30px] pr-8",
+          "h-8 w-full rounded-[8px] border border-border bg-surface pl-[30px] pr-8",
           "text-[13px] text-primary placeholder:text-muted",
-          "transition-colors duration-100 focus:border-accent focus:outline-none",
+          "transition-colors duration-150 focus:border-accent focus:outline-none",
           "[&::-webkit-search-cancel-button]:hidden",
         )}
       />
@@ -62,7 +62,7 @@ export function SearchField({
             onChange("");
             ref.current?.focus();
           }}
-          className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-[4px] p-1 text-muted hover:bg-surface-2 hover:text-primary"
+          className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-[6px] p-1 text-muted hover:bg-surface-2 hover:text-primary"
         >
           <X size={13} strokeWidth={2} />
         </button>

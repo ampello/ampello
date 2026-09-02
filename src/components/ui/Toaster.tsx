@@ -31,7 +31,7 @@ export function Toaster() {
             type="button"
             aria-label="Dismiss"
             onClick={() => dismiss(toast.id)}
-            className="-m-0.5 shrink-0 rounded-[4px] p-0.5 opacity-60 hover:opacity-100"
+            className="-m-0.5 shrink-0 rounded-[6px] p-0.5 opacity-60 hover:opacity-100"
           >
             <X size={13} strokeWidth={2} />
           </button>

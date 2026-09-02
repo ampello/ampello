@@ -35,7 +35,7 @@ export function SnippetRow({
       onClick={onSelect}
       onDoubleClick={onOpen}
       className={cn(
-        "group flex h-full w-full cursor-default items-center gap-3 rounded-[7px] px-3",
+        "group flex h-full w-full cursor-default items-center gap-3 rounded-[9px] px-3",
         "transition-colors duration-75",
         selected ? "bg-accent-soft" : "hover:bg-surface-2",
       )}
@@ -51,7 +51,7 @@ export function SnippetRow({
             {snippet.trigger}
           </span>
           {!snippet.enabled ? (
-            <span className="shrink-0 rounded-[4px] border border-border px-1 text-[10.5px] uppercase tracking-[0.04em] text-muted">
+            <span className="shrink-0 rounded-[6px] border border-border px-1 text-[10.5px] uppercase tracking-[0.04em] text-muted">
               Off
             </span>
           ) : null}
@@ -73,7 +73,7 @@ export function SnippetRow({
       </div>
 
       {categoryName ? (
-        <span className="hidden shrink-0 rounded-[4px] bg-surface-3 px-1.5 py-0.5 text-[11px] text-secondary sm:inline">
+        <span className="hidden shrink-0 rounded-[6px] bg-surface-3 px-1.5 py-0.5 text-[11px] text-secondary sm:inline">
           {categoryName}
         </span>
       ) : null}
@@ -87,7 +87,7 @@ export function SnippetRow({
           onToggleFavorite();
         }}
         className={cn(
-          "shrink-0 rounded-[5px] p-1.5 transition-colors duration-100",
+          "shrink-0 rounded-[5px] p-1.5 transition-colors duration-150",
           snippet.favorite
             ? "text-accent"
             : "text-muted opacity-0 hover:text-primary group-hover:opacity-100 focus-visible:opacity-100",
@@ -100,7 +100,7 @@ export function SnippetRow({
         />
       </button>
 
-      <div className="shrink-0 opacity-0 transition-opacity duration-100 group-hover:opacity-100 focus-within:opacity-100">
+      <div className="shrink-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100 focus-within:opacity-100">
         <Menu
           label={`Actions for ${snippet.trigger}`}
           items={[

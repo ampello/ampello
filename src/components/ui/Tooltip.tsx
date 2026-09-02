@@ -79,7 +79,7 @@ export function Tooltip({
         className={cn(
 
           "cursor-help underline decoration-muted/60 decoration-dotted underline-offset-4",
-          "transition-colors duration-100 hover:decoration-muted",
+          "transition-colors duration-150 hover:decoration-muted",
           className,
         )}
       >
