@@ -300,14 +300,17 @@ pub struct Diagnostics {
 }
 
 #[tauri::command]
-pub fn diagnostics(app: AppHandle) -> Diagnostics {
-    use tauri::Manager;
+pub fn diagnostics() -> Diagnostics {
+    // Derived the same way the log target is, rather than from Tauri's
+    // identifier-based path: `app_log_dir` would report
+    // `%APPDATA%\com.yohann.ampello\logs`, which is not where logs are written.
     Diagnostics {
-        log_directory: app
-            .path()
-            .app_log_dir()
-            .ok()
-            .map(|path| path.to_string_lossy().into_owned()),
+        log_directory: Some(
+            crate::data_dir()
+                .join("logs")
+                .to_string_lossy()
+                .into_owned(),
+        ),
     }
 }
 
