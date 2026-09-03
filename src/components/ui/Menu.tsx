@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Ellipsis } from "lucide-react";
+import { Check, Ellipsis } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { IconButton } from "./IconButton";
 
@@ -11,6 +11,9 @@ export interface MenuItem {
   danger?: boolean;
   separatorBefore?: boolean;
   disabled?: boolean;
+  // Present on items that toggle something, so the menu can carry state that
+  // would otherwise need a control of its own.
+  checked?: boolean;
 }
 
 interface MenuProps {
@@ -107,7 +110,8 @@ export function Menu({ label, items, className }: MenuProps) {
                   ) : null}
                   <button
                     type="button"
-                    role="menuitem"
+                    role={item.checked === undefined ? "menuitem" : "menuitemcheckbox"}
+                    aria-checked={item.checked}
                     disabled={item.disabled}
                     onClick={(event) => {
                       event.stopPropagation();
@@ -123,6 +127,13 @@ export function Menu({ label, items, className }: MenuProps) {
                         : "text-primary hover:bg-surface-2",
                     )}
                   >
+                    {item.checked === undefined ? null : (
+                      <span className="mr-1.5 flex w-3.5 shrink-0 justify-center">
+                        {item.checked ? (
+                          <Check size={12} strokeWidth={2.5} />
+                        ) : null}
+                      </span>
+                    )}
                     {item.label}
                   </button>
                 </div>

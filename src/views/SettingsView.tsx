@@ -58,12 +58,11 @@ const CLIPBOARD_OPTIONS = [
 
 const SHORTCUTS: [string, string][] = [
   ["Ctrl N", "New snippet"],
-  ["Ctrl F", "Find in the editor"],
   ["Ctrl K", "Search snippets"],
-  ["Ctrl H", "Find and replace"],
   ["Ctrl S", "Save"],
+  ["Ctrl F", "Find in the editor"],
+  ["Ctrl H", "Find and replace"],
   ["↑ ↓", "Move through the list"],
-  ["Enter", "Open the selected snippet"],
   ["Del", "Delete the selected snippet"],
   ["Esc", "Close the editor or a dialog"],
   ["Esc", "Stop an expansion part-way through"],
@@ -189,6 +188,46 @@ export function SettingsView() {
               <Notice tone="danger">{error}</Notice>
             </div>
           ) : null}
+
+          <SettingsSection title="General">
+            <SettingsRow
+              label="Theme"
+              hint="Light, dark, or follow the Windows app theme and change with it as Windows does."
+              control={
+                <SegmentedControl<Appearance>
+                  label="Theme"
+                  value={settings.appearance}
+                  options={APPEARANCE_OPTIONS}
+                  onChange={(value) => void setAppearance(value).catch(reportError)}
+                />
+              }
+            />
+
+            <SettingsRow
+              label="Launch at startup"
+              hint="Registers Ampello with Windows so it starts when you sign in. A startup launch goes straight to the notification area without opening a window."
+              control={
+                <Switch
+                  label="Launch at startup"
+                  checked={settings.launchAtStartup}
+                  onChange={(launchAtStartup) => apply({ launchAtStartup })}
+                />
+              }
+            />
+
+            <SettingsRow
+              label="Close to the tray"
+              hint="What the window’s close button does. On, closing the window leaves Ampello running in the notification area and snippets keep expanding. Off, closing the window quits Ampello entirely and expansion stops until you start it again."
+              control={
+                <Switch
+                  label="Close to the tray"
+                  checked={settings.closeToTray}
+                  onChange={(closeToTray) => apply({ closeToTray })}
+                />
+              }
+            />
+          </SettingsSection>
+
           <SettingsSection title="Expansion">
             <SettingsBlock>
               <EngineBanner
@@ -240,7 +279,9 @@ export function SettingsView() {
                 />
               }
             />
+          </SettingsSection>
 
+          <SettingsSection title="Insertion">
             <SettingsRow
               label="Insertion method"
               hint="How a snippet reaches the application you are typing in. Auto sends short single-line snippets as keystrokes and uses the clipboard for anything longer, multi-line or indented. Leave this selected unless something is wrong. Paste always uses the clipboard: instant and exact, but the application has to accept Ctrl+V. Type always sends keystrokes and never touches the clipboard, for applications that refuse a paste; it is slower, and an application that ignores character-level tabs will lose the indentation. A long insertion can be stopped part-way with Escape."
@@ -308,83 +349,8 @@ export function SettingsView() {
               }
             />
           </SettingsSection>
-          <SettingsSection title="Clipboard shortcut">
-            <SettingsRow
-              label="Enabled"
-              hint="A second key combination that inserts whatever is on your clipboard, alongside the usual Ctrl+V rather than replacing it. Switch it off and the combination goes straight back to the application you are working in. It is also released while snippet expansion is paused, because pausing Ampello pauses all of it."
-              control={
-                <Switch
-                  label="Clipboard shortcut"
-                  checked={settings.clipboardShortcutEnabled}
-                  onChange={(clipboardShortcutEnabled) =>
-                    apply({ clipboardShortcutEnabled })
-                  }
-                />
-              }
-            />
 
-            <SettingsRow
-              label="Combination"
-              hint="The combination that inserts the clipboard. Ctrl Shift V by default, which few applications use for anything you would miss. It cannot be the same as the global shortcut, and if another application has already claimed it Ampello will say so rather than failing quietly."
-              control={
-                <ShortcutRecorder
-                  value={settings.clipboardShortcut}
-                  onChange={(clipboardShortcut) => apply({ clipboardShortcut })}
-                />
-              }
-            />
-
-            <SettingsRow
-              label="Method"
-              hint="What the combination does. Type sends the clipboard as individual keystrokes at the typing speed set above, which is how text gets into an application that refuses a paste or reformats one; a long clipboard takes a while, and Escape stops it part-way. Paste sends a plain Ctrl+V, which is instant and exact. If the clipboard holds an image or a list of files there is nothing to type, so Ampello pastes either way."
-              control={
-                <SegmentedControl<ClipboardMode>
-                  label="Method"
-                  value={settings.clipboardMode}
-                  options={CLIPBOARD_OPTIONS}
-                  onChange={(clipboardMode) => apply({ clipboardMode })}
-                />
-              }
-            />
-          </SettingsSection>
-          <SettingsSection title="General">
-            <SettingsRow
-              label="Theme"
-              hint="Light, dark, or follow the Windows app theme and change with it as Windows does."
-              control={
-                <SegmentedControl<Appearance>
-                  label="Theme"
-                  value={settings.appearance}
-                  options={APPEARANCE_OPTIONS}
-                  onChange={(value) => void setAppearance(value).catch(reportError)}
-                />
-              }
-            />
-
-            <SettingsRow
-              label="Launch at startup"
-              hint="Registers Ampello with Windows so it starts when you sign in. A startup launch goes straight to the notification area without opening a window."
-              control={
-                <Switch
-                  label="Launch at startup"
-                  checked={settings.launchAtStartup}
-                  onChange={(launchAtStartup) => apply({ launchAtStartup })}
-                />
-              }
-            />
-
-            <SettingsRow
-              label="Close to the tray"
-              hint="What the window\u2019s close button does. On, closing the window leaves Ampello running in the notification area and snippets keep expanding. Off, closing the window quits Ampello entirely and expansion stops until you start it again."
-              control={
-                <Switch
-                  label="Close to the tray"
-                  checked={settings.closeToTray}
-                  onChange={(closeToTray) => apply({ closeToTray })}
-                />
-              }
-            />
-
+          <SettingsSection title="Shortcuts">
             <SettingsRow
               label="Global shortcut"
               hint="A key combination that brings Ampello forward from any application, and puts it away again if it is already in front. If another application has already claimed the combination Ampello will say so rather than failing quietly."
@@ -402,12 +368,51 @@ export function SettingsView() {
                 another.
               </Notice>
             ) : null}
+
+            <SettingsRow
+              label="Clipboard shortcut"
+              hint="A second key combination that inserts whatever is on your clipboard, alongside the usual Ctrl+V rather than replacing it. Switch it off and the combination goes straight back to the application you are working in. It is also released while snippet expansion is paused, because pausing Ampello pauses all of it."
+              control={
+                <Switch
+                  label="Clipboard shortcut"
+                  checked={settings.clipboardShortcutEnabled}
+                  onChange={(clipboardShortcutEnabled) =>
+                    apply({ clipboardShortcutEnabled })
+                  }
+                />
+              }
+            />
+
+            <SettingsRow
+              label="Clipboard combination"
+              hint="The combination that inserts the clipboard. Ctrl Shift V by default, which few applications use for anything you would miss. It cannot be the same as the global shortcut, and if another application has already claimed it Ampello will say so rather than failing quietly."
+              control={
+                <ShortcutRecorder
+                  value={settings.clipboardShortcut}
+                  onChange={(clipboardShortcut) => apply({ clipboardShortcut })}
+                />
+              }
+            />
+
+            <SettingsRow
+              label="Clipboard method"
+              hint="What the combination does. Type sends the clipboard as individual keystrokes at the typing speed set above, which is how text gets into an application that refuses a paste or reformats one; a long clipboard takes a while, and Escape stops it part-way. Paste sends a plain Ctrl+V, which is instant and exact. If the clipboard holds an image or a list of files there is nothing to type, so Ampello pastes either way."
+              control={
+                <SegmentedControl<ClipboardMode>
+                  label="Clipboard method"
+                  value={settings.clipboardMode}
+                  options={CLIPBOARD_OPTIONS}
+                  onChange={(clipboardMode) => apply({ clipboardMode })}
+                />
+              }
+            />
           </SettingsSection>
+
           <SettingsSection title="Keyboard">
             <SettingsBlock className="grid grid-cols-2 gap-x-10 gap-y-2.5">
               {SHORTCUTS.map(([keys, description]) => (
                 <div
-                  key={description}
+                  key={`${keys} ${description}`}
                   className="flex items-baseline justify-between gap-3"
                 >
                   <span className="truncate text-[12.5px] text-secondary">
@@ -418,6 +423,7 @@ export function SettingsView() {
               ))}
             </SettingsBlock>
           </SettingsSection>
+
           <SettingsSection title="Data">
             {info?.recoveredFrom ? (
               <Notice tone="danger">
@@ -476,7 +482,6 @@ export function SettingsView() {
               }
             />
 
-
             <SettingsRow
               label="Export"
               hint="Writes your whole library to one file: every trigger, title and body, which collection each belongs to, and whether it is enabled or a favourite. Content is stored byte for byte. YAML is readable and safe to edit by hand; JSON is there for other tools."
@@ -530,6 +535,7 @@ export function SettingsView() {
               </details>
             </SettingsBlock>
           </SettingsSection>
+
           <SettingsSection title="About">
             <SettingsRow
               label="Version"

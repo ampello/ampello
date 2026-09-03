@@ -17,9 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { SegmentedControl } from "@/components/ui/SegmentedControl";
-import { Switch } from "@/components/ui/Switch";
-import { Tooltip } from "@/components/ui/Tooltip";
+import { Menu } from "@/components/ui/Menu";
 import * as ipc from "@/lib/ipc";
 import { cn } from "@/lib/cn";
 import { useFileDrop } from "@/lib/fileDrop";
@@ -171,6 +169,41 @@ export function AttachmentList({
             <Plus size={13} strokeWidth={2} />
             Add files
           </Button>
+
+          {attachments.length > 0 ? (
+            <Menu
+              label="Attachment options"
+              items={[
+                {
+                  label: "Text first",
+                  checked: !snippet.attachmentsFirst,
+                  onSelect: () =>
+                    void run(() =>
+                      ipc.updateSnippet(snippet.id, { attachmentsFirst: false }),
+                    ),
+                },
+                {
+                  label: "Files first",
+                  checked: snippet.attachmentsFirst,
+                  onSelect: () =>
+                    void run(() =>
+                      ipc.updateSnippet(snippet.id, { attachmentsFirst: true }),
+                    ),
+                },
+                {
+                  label: "Keep exact order",
+                  separatorBefore: true,
+                  checked: snippet.strictOrder,
+                  onSelect: () =>
+                    void run(() =>
+                      ipc.updateSnippet(snippet.id, {
+                        strictOrder: !snippet.strictOrder,
+                      }),
+                    ),
+                },
+              ]}
+            />
+          ) : null}
         </div>
 
         {open ? (
@@ -195,55 +228,6 @@ export function AttachmentList({
                   ))}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border px-3 py-2.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[12.5px] text-secondary">Send</span>
-                    <SegmentedControl
-                      label="Whether the files go in before the text or after it"
-                      value={snippet.attachmentsFirst ? "first" : "last"}
-                      options={[
-                        { value: "first", label: "Files first" },
-                        { value: "last", label: "Text first" },
-                      ]}
-                      onChange={(value) =>
-                        void run(() =>
-                          ipc.updateSnippet(snippet.id, {
-                            attachmentsFirst: value === "first",
-                          }),
-                        )
-                      }
-                    />
-                  </div>
-
-                  <Tooltip
-                    content={
-                      "Hands the files over one at a time and waits for each. Slower, but " +
-                      "some applications upload in parallel and show the files in whatever " +
-                      "order finishes first, which is not the order you set here."
-                    }
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-[12.5px] text-secondary">
-                        Keep this exact order
-                      </span>
-                      <Switch
-                        label="Hand the files over one at a time"
-                        checked={snippet.strictOrder}
-                        onChange={(checked) =>
-                          void run(() =>
-                            ipc.updateSnippet(snippet.id, { strictOrder: checked }),
-                          )
-                        }
-                      />
-                    </div>
-                  </Tooltip>
-
-                  {snippet.strictOrder ? (
-                    <span className="text-[11.5px] text-muted">
-                      About {estimateSeconds(attachments.length)}s to insert.
-                    </span>
-                  ) : null}
-                </div>
               </>
             )}
           </div>
@@ -473,10 +457,6 @@ function label(attachment: Attachment): string {
     ? attachment.name.split(".").pop()?.toUpperCase()
     : null;
   return `${extension ?? "File"} · ${formatSize(attachment.sizeBytes)}`;
-}
-
-function estimateSeconds(count: number): number {
-  return Math.max(1, Math.round((count * 530) / 100) / 10);
 }
 
 function formatSize(bytes: number): string {
