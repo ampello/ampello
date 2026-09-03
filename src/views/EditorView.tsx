@@ -25,7 +25,15 @@ interface Loaded {
   categoryId: string | null;
 }
 
-export function EditorView({ id, inline = false }: { id: string; inline?: boolean }) {
+export function EditorView({
+  id,
+  inline = false,
+  wide = false,
+}: {
+  id: string;
+  inline?: boolean;
+  wide?: boolean;
+}) {
   const isNew = id === "new";
   const closeEditor = useUiStore((s) => s.closeEditor);
   const openEditor = useUiStore((s) => s.openEditor);
@@ -208,7 +216,7 @@ export function EditorView({ id, inline = false }: { id: string; inline?: boolea
         {...(inline ? {} : { "data-tauri-drag-region": true })}
         className={cn(
           "flex h-12 shrink-0 items-center gap-2 border-b border-border bg-bg",
-          inline ? "px-3" : "gap-3 pl-3 pr-[158px]",
+          inline ? (wide ? "px-6" : "px-3") : "gap-3 pl-3 pr-[158px]",
         )}
       >
         {inline ? null : (
@@ -253,13 +261,18 @@ export function EditorView({ id, inline = false }: { id: string; inline?: boolea
       <div
         className={cn(
           "flex min-h-0 flex-1 flex-col pb-4 pt-4",
-          inline ? "px-3" : "px-6 pt-5",
+          inline ? (wide ? "px-6" : "px-3") : "px-6 pt-5",
         )}
       >
-        <div className={cn("mb-4 flex items-start gap-4", inline ? "flex-col gap-3" : "flex-wrap")}>
+        <div
+          className={cn(
+            "mb-4 flex items-start gap-4",
+            inline && !wide ? "flex-col gap-3" : "flex-wrap",
+          )}
+        >
           <Field
             label="Trigger"
-            className={inline ? "w-full" : "min-w-[240px] flex-1"}
+            className={inline && !wide ? "w-full" : "min-w-[240px] flex-1"}
             error={triggerProblem}
           >
             <Input
@@ -275,7 +288,7 @@ export function EditorView({ id, inline = false }: { id: string; inline?: boolea
             />
           </Field>
 
-          <Field label="Collection" className={inline ? "w-full" : "w-[190px]"}>
+          <Field label="Collection" className={inline && !wide ? "w-full" : "w-[190px]"}>
             <select
               value={categoryId ?? ""}
               onChange={(event) => {

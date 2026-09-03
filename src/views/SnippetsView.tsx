@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { Plus } from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
 import { StatusBar } from "@/components/layout/StatusBar";
+import { PaneDivider } from "@/components/layout/PaneDivider";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Spinner } from "@/components/ui/Spinner";
@@ -12,7 +13,11 @@ import { SnippetList } from "@/components/snippets/SnippetList";
 import { EditorView } from "@/views/EditorView";
 import { Button } from "@/components/ui/Button";
 import { useDataStore } from "@/stores/dataStore";
-import { useUiStore } from "@/stores/uiStore";
+import {
+  useUiStore,
+  LIST_MIN_WIDTH,
+  PANE_MIN_WIDTH,
+} from "@/stores/uiStore";
 import { reportError } from "@/stores/toastStore";
 import type { SnippetSummary } from "@/lib/types";
 
@@ -21,6 +26,10 @@ export function SnippetsView() {
   const openEditor = useUiStore((s) => s.openEditor);
   const editingId = useUiStore((s) => s.editingId);
   const closeEditor = useUiStore((s) => s.closeEditor);
+  const paneWidth = useUiStore((s) => s.paneWidth);
+  const paneExpanded = useUiStore((s) => s.paneExpanded);
+  const setPaneWidth = useUiStore((s) => s.setPaneWidth);
+  const setPaneExpanded = useUiStore((s) => s.setPaneExpanded);
 
   const snippets = useDataStore((s) => s.snippets);
   const categories = useDataStore((s) => s.categories);
@@ -33,11 +42,17 @@ export function SnippetsView() {
   const removeSnippet = useDataStore((s) => s.removeSnippet);
 
   const [pendingDelete, setPendingDelete] = useState<SnippetSummary | null>(null);
+  const splitRef = useRef<HTMLDivElement>(null);
 
   // A row is selected precisely when the pane is showing it. "new" is a
   // draft that has no row yet.
   const selectedId = editingId === "new" ? null : editingId;
   const setSelectedId = (id: string | null) => (id ? openEditor(id) : closeEditor());
+
+  // Expanding hides the list, so it only applies while there is something in
+  // the pane to expand. Without this the preference could strand the user on
+  // an empty screen with no way back to their snippets.
+  const expanded = paneExpanded && Boolean(editingId);
 
   const scopeTitle =
     scope.kind === "all"
@@ -91,8 +106,12 @@ export function SnippetsView() {
     <div className="flex min-h-0 flex-1 flex-col" onKeyDown={onKeyDown}>
       <TopBar title={scopeTitle} />
 
-      <div className="flex min-h-0 flex-1">
-        <div className="flex min-h-0 min-w-[280px] flex-1 flex-col">
+      <div ref={splitRef} className="flex min-h-0 flex-1">
+        <div
+          hidden={expanded}
+          className="flex min-h-0 flex-1 flex-col"
+          style={{ minWidth: LIST_MIN_WIDTH }}
+        >
           <div className="flex shrink-0 items-center gap-2 px-3 pb-2 pt-3">
             <SearchField value={query} onChange={setQuery} />
             <Button size="sm" className="shrink-0" onClick={() => openEditor(null)}>
@@ -148,11 +167,36 @@ export function SnippetsView() {
           </div>
         </div>
 
+        <PaneDivider
+          width={paneWidth}
+          expanded={expanded}
+          minPane={PANE_MIN_WIDTH}
+          minList={LIST_MIN_WIDTH}
+          containerRef={splitRef}
+          onResize={setPaneWidth}
+          onExpandedChange={setPaneExpanded}
+        />
+
         {/* The detail pane: the selected snippet stays beside the list rather
-            than replacing it, so moving between snippets costs one click. */}
-        <aside className="flex w-[420px] min-w-[340px] flex-col border-l border-border bg-bg">
+            than replacing it, so moving between snippets costs one click.
+            Dragging the divider to the far left gives the editor the lot. */}
+        <aside
+          className="flex min-h-0 flex-col bg-bg"
+          style={
+            expanded
+              ? { flex: "1 1 0%", minWidth: 0 }
+              : {
+                  width: paneWidth,
+                  minWidth: PANE_MIN_WIDTH,
+                  // A width stored when the window was wider must not push the
+                  // list off the edge after the window shrinks.
+                  maxWidth: `calc(100% - ${LIST_MIN_WIDTH}px)`,
+                  flexShrink: 0,
+                }
+          }
+        >
           {editingId ? (
-            <EditorView key={editingId} id={editingId} inline />
+            <EditorView key={editingId} id={editingId} inline wide={expanded} />
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
               <p className="text-[13px] font-medium text-primary">No snippet selected</p>

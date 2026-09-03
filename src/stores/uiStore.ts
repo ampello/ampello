@@ -14,6 +14,9 @@ interface UiState {
   sidebarCollapsed: boolean;
   search: string;
 
+  paneWidth: number;
+  paneExpanded: boolean;
+
   editingId: string | null;
 
   draftCategoryId: string | null;
@@ -21,18 +24,28 @@ interface UiState {
   setView: (view: View) => void;
   setScope: (scope: Scope) => void;
   toggleSidebar: () => void;
+  setPaneWidth: (width: number) => void;
+  setPaneExpanded: (expanded: boolean) => void;
   setSearch: (search: string) => void;
   openEditor: (id: string | null) => void;
   closeEditor: () => void;
 }
 
 const SIDEBAR_KEY = "ampello.sidebarCollapsed";
+const PANE_WIDTH_KEY = "ampello.paneWidth";
+const PANE_EXPANDED_KEY = "ampello.paneExpanded";
+
+export const PANE_DEFAULT_WIDTH = 420;
+export const PANE_MIN_WIDTH = 340;
+export const LIST_MIN_WIDTH = 280;
 
 export const useUiStore = create<UiState>((set) => ({
   view: "dashboard",
   scope: { kind: "all" },
   sidebarCollapsed: readBool(SIDEBAR_KEY, false),
   search: "",
+  paneWidth: readNumber(PANE_WIDTH_KEY, PANE_DEFAULT_WIDTH),
+  paneExpanded: readBool(PANE_EXPANDED_KEY, false),
   editingId: null,
   draftCategoryId: null,
 
@@ -43,6 +56,16 @@ export const useUiStore = create<UiState>((set) => ({
       const next = !state.sidebarCollapsed;
       writeBool(SIDEBAR_KEY, next);
       return { sidebarCollapsed: next };
+    }),
+  setPaneWidth: (width) =>
+    set(() => {
+      writeNumber(PANE_WIDTH_KEY, width);
+      return { paneWidth: width };
+    }),
+  setPaneExpanded: (expanded) =>
+    set(() => {
+      writeBool(PANE_EXPANDED_KEY, expanded);
+      return { paneExpanded: expanded };
     }),
   setSearch: (search) => set({ search }),
   openEditor: (id) =>
@@ -63,6 +86,24 @@ function readBool(key: string, fallback: boolean): boolean {
     return raw === null ? fallback : raw === "true";
   } catch {
     return fallback;
+  }
+}
+
+function readNumber(key: string, fallback: number): number {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw === null) return fallback;
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeNumber(key: string, value: number) {
+  try {
+    localStorage.setItem(key, String(value));
+  } catch {
   }
 }
 
