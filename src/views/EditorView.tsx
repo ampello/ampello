@@ -33,6 +33,7 @@ export function EditorView({ id, inline = false }: { id: string; inline?: boolea
   const categories = useDataStore((s) => s.categories);
   const createSnippet = useDataStore((s) => s.createSnippet);
   const saveSnippet = useDataStore((s) => s.saveSnippet);
+  const removeSnippet = useDataStore((s) => s.removeSnippet);
   const pushToast = useToastStore((s) => s.push);
 
   const [loaded, setLoaded] = useState<Loaded | null>(null);
@@ -47,6 +48,7 @@ export function EditorView({ id, inline = false }: { id: string; inline?: boolea
   const [triggerProblem, setTriggerProblem] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const editorRef = useRef<EditorHandle | null>(null);
   const dirty = contentDirty || fieldsDirty;
@@ -305,6 +307,14 @@ export function EditorView({ id, inline = false }: { id: string; inline?: boolea
             setLoaded((current) => (current ? { ...current, snippet: updated } : current))
           }
         />
+
+        {inline && !isNew ? (
+          <div className="mt-3 flex shrink-0 justify-end border-t border-border pt-3">
+            <Button variant="danger" size="sm" onClick={() => setConfirmDelete(true)}>
+              Delete
+            </Button>
+          </div>
+        ) : null}
       </div>
 
       {confirmDiscard ? (
@@ -318,6 +328,22 @@ export function EditorView({ id, inline = false }: { id: string; inline?: boolea
           onConfirm={() => {
             setConfirmDiscard(false);
             closeEditor();
+          }}
+        />
+      ) : null}
+
+      {confirmDelete ? (
+        <ConfirmDialog
+          title={`Delete ${loaded.trigger}?`}
+          description="This removes the snippet and its content. It cannot be undone."
+          confirmLabel="Delete"
+          danger
+          onCancel={() => setConfirmDelete(false)}
+          onConfirm={() => {
+            setConfirmDelete(false);
+            void removeSnippet(id)
+              .then(() => closeEditor())
+              .catch(reportError);
           }}
         />
       ) : null}

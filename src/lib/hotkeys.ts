@@ -17,17 +17,18 @@ export function useGlobalHotkeys() {
       const mod = event.ctrlKey || event.metaKey;
       if (!mod || event.altKey) return;
       const key = event.key.toLowerCase();
-      const { view, openEditor, setView } = useUiStore.getState();
+      const { openEditor, setView } = useUiStore.getState();
 
       if (key === "n" && !event.shiftKey) {
-        if (view === "editor") return;
+        // The editor sits in a pane beside the list, so without this Ctrl+N
+        // would discard a draft the cursor is still in.
+        if (isTypingTarget(event.target)) return;
         event.preventDefault();
         openEditor(null);
         return;
       }
 
       if (key === "k") {
-        if (view === "editor") return;
         event.preventDefault();
         setView("snippets");
 

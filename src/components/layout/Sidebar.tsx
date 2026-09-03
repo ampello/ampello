@@ -33,7 +33,7 @@ export function Sidebar() {
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<Category | null>(null);
 
-  const onSnippets = view === "snippets" || view === "editor";
+  const onSnippets = view === "snippets";
   const favoriteCount = snippets.filter((s) => s.favorite).length;
 
   return (

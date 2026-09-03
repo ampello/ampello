@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { useEffect, useMemo, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
+import { Plus } from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
+import { StatusBar } from "@/components/layout/StatusBar";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Spinner } from "@/components/ui/Spinner";
@@ -87,56 +89,68 @@ export function SnippetsView() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col" onKeyDown={onKeyDown}>
-      <TopBar
-        title={scopeTitle}
-        meta={visible.length > 0 ? String(visible.length) : undefined}
-        center={<SearchField value={query} onChange={setQuery} />}
-      />
+      <TopBar title={scopeTitle} />
 
       <div className="flex min-h-0 flex-1">
-        <div className="min-h-0 min-w-0 flex-1">
-        {searching && visible.length === 0 ? (
-          <div className="flex h-full items-center justify-center">
-            <Spinner />
+        <div className="flex min-h-0 min-w-[280px] flex-1 flex-col">
+          <div className="flex shrink-0 items-center gap-2 px-3 pb-2 pt-3">
+            <SearchField value={query} onChange={setQuery} />
+            <Button size="sm" className="shrink-0" onClick={() => openEditor(null)}>
+              <Plus size={14} strokeWidth={2} />
+              New snippet
+            </Button>
           </div>
-        ) : visible.length > 0 ? (
-          <SnippetList
-            snippets={visible}
-            categories={categories}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            onOpen={openEditor}
-            onToggleFavorite={(snippet) =>
-              void setFavorite(snippet.id, !snippet.favorite).catch(reportError)
-            }
-            onToggleEnabled={(snippet) =>
-              void setEnabled(snippet.id, !snippet.enabled).catch(reportError)
-            }
-            onDelete={setPendingDelete}
-          />
-        ) : query.trim() ? (
-          <EmptyState
-            title={`No snippets match “${query.trim()}”`}
-            description="Search looks at triggers, titles, collections and the full text of every snippet."
-          />
-        ) : scope.kind === "favorites" ? (
-          <EmptyState
-            title="No favorites yet"
-            description="Star a snippet to keep it here."
-          />
-        ) : snippets.length === 0 ? (
-          <EmptyState
-            title="No snippets yet"
-            description="A snippet is a trigger and the text it becomes. Type the trigger anywhere and Ampello puts the text there. New Snippet is in the sidebar."
-          />
-        ) : (
-          <EmptyState description="A snippet created while this collection is open is added to it. An existing snippet can be moved in from its editor." />
-        )}
+
+          {visible.length > 0 ? (
+            <p className="shrink-0 px-4 pb-1.5 text-[11.5px] text-secondary">
+              {visible.length === 1 ? "1 snippet" : `${visible.length} snippets`}
+            </p>
+          ) : null}
+
+          <div className="min-h-0 flex-1">
+            {searching && visible.length === 0 ? (
+              <div className="flex h-full items-center justify-center">
+                <Spinner />
+              </div>
+            ) : visible.length > 0 ? (
+              <SnippetList
+                snippets={visible}
+                categories={categories}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                onOpen={openEditor}
+                onToggleFavorite={(snippet) =>
+                  void setFavorite(snippet.id, !snippet.favorite).catch(reportError)
+                }
+                onToggleEnabled={(snippet) =>
+                  void setEnabled(snippet.id, !snippet.enabled).catch(reportError)
+                }
+                onDelete={setPendingDelete}
+              />
+            ) : query.trim() ? (
+              <EmptyState
+                title={`No snippets match “${query.trim()}”`}
+                description="Search looks at triggers, titles, collections and the full text of every snippet."
+              />
+            ) : scope.kind === "favorites" ? (
+              <EmptyState
+                title="No favorites yet"
+                description="Star a snippet to keep it here."
+              />
+            ) : snippets.length === 0 ? (
+              <EmptyState
+                title="No snippets yet"
+                description="A snippet is a trigger and the text it becomes. Type the trigger anywhere and Ampello puts the text there."
+              />
+            ) : (
+              <EmptyState description="A snippet created while this collection is open is added to it. An existing snippet can be moved in from its editor." />
+            )}
+          </div>
         </div>
 
         {/* The detail pane: the selected snippet stays beside the list rather
             than replacing it, so moving between snippets costs one click. */}
-        <aside className="flex w-[420px] shrink-0 flex-col border-l border-border bg-bg">
+        <aside className="flex w-[420px] min-w-[340px] flex-col border-l border-border bg-bg">
           {editingId ? (
             <EditorView key={editingId} id={editingId} inline />
           ) : (
@@ -152,6 +166,8 @@ export function SnippetsView() {
           )}
         </aside>
       </div>
+
+      <StatusBar />
 
       {pendingDelete ? (
         <ConfirmDialog

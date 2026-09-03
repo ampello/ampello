@@ -277,7 +277,7 @@ mod switching {
 
     fn triggers(dir: &Path) -> Vec<String> {
         let db = Database::open(&dir.join(DATABASE)).unwrap();
-        db.with(|conn| snippets::list_summaries(conn))
+        db.with(snippets::list_summaries)
             .unwrap()
             .into_iter()
             .map(|s| s.trigger)

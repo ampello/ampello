@@ -54,10 +54,15 @@ jobs:
           node-version: 20
           cache: npm
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
       - run: npm ci
       - run: npm run build
-      - name: Check
-        run: cargo check --manifest-path src-tauri/Cargo.toml --all-targets
+      # Clippy builds everything `cargo check` would, so it replaces it.
+      - name: Clippy
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+      - name: Test
+        run: cargo test --manifest-path src-tauri/Cargo.toml

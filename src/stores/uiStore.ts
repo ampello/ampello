@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { create } from "zustand";
 
-export type View = "dashboard" | "snippets" | "settings" | "editor";
+export type View = "dashboard" | "snippets" | "settings";
 
 export type Scope =
   | { kind: "all" }

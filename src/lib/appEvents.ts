@@ -8,7 +8,7 @@ import { useUiStore } from "@/stores/uiStore";
 const EXPANDED = "ampello://expanded";
 const SETTINGS_CHANGED = "ampello://settings-changed";
 const OPEN_SETTINGS = "ampello://open-settings";
-const LIBRARY_CHANGED = "ampello://library-changed";
+export const LIBRARY_CHANGED = "ampello://library-changed";
 
 export function useAppEvents() {
   useEffect(() => {

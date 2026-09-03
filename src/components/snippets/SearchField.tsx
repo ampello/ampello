@@ -33,7 +33,7 @@ export function SearchField({
   }, []);
 
   return (
-    <div className={cn("relative w-full max-w-[420px]", className)}>
+    <div className={cn("relative w-full", className)}>
       <Search
         size={14}
         strokeWidth={1.75}
