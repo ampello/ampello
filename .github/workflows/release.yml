@@ -12,6 +12,12 @@ on:
 permissions:
   contents: write
 
+# Two pushes of the same tag would otherwise race, and the slower run wins by
+# uploading last, which can publish an older commit over a newer one.
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: ${{ matrix.label }}
