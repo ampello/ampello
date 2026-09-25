@@ -4,6 +4,7 @@
     "windows": [
       {
         "label": "main",
+        "create": false,
         "title": "Ampello",
         "width": 1180,
         "height": 780,

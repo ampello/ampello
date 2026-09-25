@@ -3,7 +3,7 @@ members = ["crates/ampello-core"]
 
 [package]
 name = "ampello"
-version = "0.2.0"
+version = "0.2.1"
 description = "Ampello - universal text expansion"
 authors = ["Yohann Joachim"]
 edition = "2021"
