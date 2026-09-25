@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+import { modKey } from "@/lib/platform";
 import { useEffect, useState } from "react";
 import * as ipc from "@/lib/ipc";
 import { LIBRARY_CHANGED } from "@/lib/appEvents";
@@ -39,7 +40,7 @@ export function StatusBar() {
 
   return (
     <footer className="flex h-7 shrink-0 items-center justify-between gap-6 border-t border-border px-4 text-[11.5px] text-secondary">
-      <span className="shrink-0">Ctrl+N new · Ctrl+K search · Ctrl+S save</span>
+      <span className="shrink-0">{modKey}+N new · {modKey}+K search · {modKey}+S save</span>
       {path ? (
         <span className="truncate" title={path}>
           {path}

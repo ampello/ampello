@@ -3,8 +3,11 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { isTauri } from "@/lib/ipc";
+import { isMac } from "@/lib/platform";
 
 export function WindowControls() {
+  if (isMac) return null;
+
   const [maximized, setMaximized] = useState(false);
 
   useEffect(() => {

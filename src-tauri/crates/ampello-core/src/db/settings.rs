@@ -42,7 +42,13 @@ impl Default for Settings {
             injection_mode: "auto".into(),
             typing_speed: "balanced".into(),
             clipboard_shortcut_enabled: true,
-            clipboard_shortcut: "CommandOrControl+Shift+V".into(),
+            // Cmd+Shift+V is "paste and match style" in most Mac applications.
+            clipboard_shortcut: if cfg!(target_os = "macos") {
+                "Control+Shift+V"
+            } else {
+                "CommandOrControl+Shift+V"
+            }
+            .into(),
             clipboard_mode: "type".into(),
             close_to_tray: true,
             attachment_settle_ms: 500,

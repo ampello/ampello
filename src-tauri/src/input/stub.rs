@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 use std::sync::Arc;
 
-use ampello_core::Database;
+use crate::state::Library;
 
 use super::{EngineStatus, ExpandedCallback};
 
@@ -10,7 +10,7 @@ pub struct InputService {
 }
 
 impl InputService {
-    pub fn start(_db: Arc<Database>, _on_expanded: ExpandedCallback) -> Self {
+    pub fn start(_library: Arc<Library>, _on_expanded: ExpandedCallback) -> Self {
         Self {
             platform: std::env::consts::OS.to_string(),
         }

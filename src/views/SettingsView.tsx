@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+import { modKey } from "@/lib/platform";
 import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Monitor, Moon, Sun, TriangleAlert } from "lucide-react";
@@ -57,11 +58,11 @@ const CLIPBOARD_OPTIONS = [
 ];
 
 const SHORTCUTS: [string, string][] = [
-  ["Ctrl N", "New snippet"],
-  ["Ctrl K", "Search snippets"],
-  ["Ctrl S", "Save"],
-  ["Ctrl F", "Find in the editor"],
-  ["Ctrl H", "Find and replace"],
+  [`${modKey} N`, "New snippet"],
+  [`${modKey} K`, "Search snippets"],
+  [`${modKey} S`, "Save"],
+  [`${modKey} F`, "Find in the editor"],
+  [`${modKey} H`, "Find and replace"],
   ["↑ ↓", "Move through the list"],
   ["Del", "Delete the selected snippet"],
   ["Esc", "Close the editor or a dialog"],
@@ -192,7 +193,7 @@ export function SettingsView() {
           <SettingsSection title="General">
             <SettingsRow
               label="Theme"
-              hint="Light, dark, or follow the Windows app theme and change with it as Windows does."
+              hint="Light, dark, or follow the system theme and change with it."
               control={
                 <SegmentedControl<Appearance>
                   label="Theme"
@@ -205,7 +206,7 @@ export function SettingsView() {
 
             <SettingsRow
               label="Launch at startup"
-              hint="Registers Ampello with Windows so it starts when you sign in. A startup launch goes straight to the notification area without opening a window."
+              hint="Registers Ampello with the system so it starts when you sign in. A startup launch goes straight to the notification area without opening a window."
               control={
                 <Switch
                   label="Launch at startup"
@@ -456,7 +457,7 @@ export function SettingsView() {
 
             <SettingsRow
               label="Location"
-              hint="Where this account keeps its snippets. A personal library is private to your Windows account. A shared folder lets everyone who points at it use the same snippets and attachments - useful on a family or office machine. Sharing is never automatic: each account has to choose the folder itself. Keep it on a local disk; a network share will not work reliably."
+              hint="Where this account keeps its snippets. A personal library is private to your user account. A shared folder lets everyone who points at it use the same snippets and attachments - useful on a family or office machine. Sharing is never automatic: each account has to choose the folder itself. Keep it on a local disk; a network share will not work reliably."
               control={
                 <div className="flex items-center gap-2">
                   <span className="text-[12.5px] text-secondary">

@@ -9,6 +9,7 @@ const EXPANDED = "ampello://expanded";
 const SETTINGS_CHANGED = "ampello://settings-changed";
 const OPEN_SETTINGS = "ampello://open-settings";
 export const LIBRARY_CHANGED = "ampello://library-changed";
+const EXTERNAL_CHANGE = "ampello://external-change";
 
 export function useAppEvents() {
   useEffect(() => {
@@ -56,12 +57,20 @@ export function useAppEvents() {
       void useSettingsStore.getState().load();
     };
 
+    // Another copy of Ampello edited the shared library. A quiet refresh, not
+    // a reload: it must not blank the list or disturb an open editor.
+    const reloadExternal = () => {
+      void useDataStore.getState().refresh().catch(() => undefined);
+      void useSettingsStore.getState().load();
+    };
+
     void import("@tauri-apps/api/event").then(async ({ listen }) => {
       const subscriptions = await Promise.all([
         listen(EXPANDED, refreshUsage),
         listen(SETTINGS_CHANGED, reloadSettings),
         listen(OPEN_SETTINGS, openSettings),
         listen(LIBRARY_CHANGED, reloadLibrary),
+        listen(EXTERNAL_CHANGE, reloadExternal),
       ]);
       if (cancelled) subscriptions.forEach((stop) => stop());
       else stoppers.push(...subscriptions);

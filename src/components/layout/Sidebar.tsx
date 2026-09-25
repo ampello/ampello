@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+import { isMac, modKey } from "@/lib/platform";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Folder, House, Layers, PanelLeft, Plus, Settings as SettingsIcon, Star } from "lucide-react";
@@ -36,6 +37,17 @@ export function Sidebar() {
   const onSnippets = view === "snippets";
   const favoriteCount = snippets.filter((s) => s.favorite).length;
 
+  const toggleButton = (
+    <IconButton
+      label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+      size="sm"
+      onClick={toggle}
+      className="opacity-70 hover:opacity-100"
+    >
+      <PanelLeft size={15} strokeWidth={1.75} />
+    </IconButton>
+  );
+
   return (
     <nav
       aria-label="Primary"
@@ -50,18 +62,14 @@ export function Sidebar() {
         data-tauri-drag-region
         className={cn(
           "flex h-12 shrink-0 items-center border-b border-border",
-          collapsed ? "justify-center px-0" : "pl-3",
+          isMac ? (collapsed ? "justify-center px-0" : "justify-end pr-3") : collapsed ? "justify-center px-0" : "pl-3",
         )}
       >
-        <IconButton
-          label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          size="sm"
-          onClick={toggle}
-          className="opacity-70 hover:opacity-100"
-        >
-          <PanelLeft size={15} strokeWidth={1.75} />
-        </IconButton>
+        {isMac && collapsed ? null : toggleButton}
       </div>
+      {isMac && collapsed ? (
+        <div className="flex shrink-0 justify-center pt-2">{toggleButton}</div>
+      ) : null}
       <div
         className={cn(
           "shrink-0 px-2.5 pt-3",
@@ -82,7 +90,7 @@ export function Sidebar() {
         )}
       >
         <Button
-          title="New snippet (Ctrl N)"
+          title={`New snippet (${modKey} N)`}
           aria-label={collapsed ? "New snippet" : undefined}
           onClick={() => openEditor(null)}
           className={cn(

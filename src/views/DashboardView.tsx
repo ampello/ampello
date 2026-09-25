@@ -142,7 +142,7 @@ function StatusCard({
     detail = "";
   } else if (broken) {
     headline = "Expansion is not running";
-    detail = engine.error ?? "Windows is not handing Ampello any keystrokes.";
+    detail = engine.error ?? "The system is not handing Ampello any keystrokes.";
   } else if (!enabled) {
     headline = "Expansion is paused";
     detail = "Ampello is still running; nothing is being watched for or replaced.";

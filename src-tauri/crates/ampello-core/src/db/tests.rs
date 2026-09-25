@@ -683,3 +683,26 @@ fn live_blobs_names_every_file_the_database_still_points_at() {
     })
     .unwrap();
 }
+
+#[test]
+fn another_connections_edit_is_noticed_and_our_own_is_not() {
+    let dir = std::env::temp_dir().join(format!("ampello-dataversion-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let path = dir.join("ampello.db");
+
+    let ours = Database::open(&path).unwrap();
+    let theirs = Database::open(&path).unwrap();
+    let before = ours.data_version().unwrap();
+
+    ours.with(|conn| snippets::create(conn, new(":mine", "x")).map(|_| ()))
+        .unwrap();
+    assert_eq!(ours.data_version().unwrap(), before);
+
+    theirs
+        .with(|conn| snippets::create(conn, new(":theirs", "y")).map(|_| ()))
+        .unwrap();
+    assert_ne!(ours.data_version().unwrap(), before);
+
+    let _ = std::fs::remove_dir_all(&dir);
+}

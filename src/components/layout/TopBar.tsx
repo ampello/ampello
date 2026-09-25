@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
+import { isMac } from "@/lib/platform";
 
 interface TopBarProps {
   title: ReactNode;
@@ -16,7 +17,8 @@ export function TopBar({ title, meta, center, className }: TopBarProps) {
       data-tauri-drag-region
       className={cn(
         "flex h-12 shrink-0 items-center gap-3 border-b border-border/70",
-        "bg-bg/80 backdrop-blur-[6px] pl-5 pr-[158px]",
+        "bg-bg/80 backdrop-blur-[6px] pl-5",
+        isMac ? "pr-5" : "pr-[158px]",
         className,
       )}
     >

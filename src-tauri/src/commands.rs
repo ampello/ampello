@@ -569,6 +569,9 @@ fn switch_library(
         .unwrap_or_else(|| personal.clone());
     let db_path = dir.join("ampello.db");
     let database = std::sync::Arc::new(ampello_core::Database::open(&db_path)?);
+    if shared.is_some() {
+        crate::library::share_permissions(&dir);
+    }
 
     crate::library::set(&personal, shared).map_err(|error| Error::invalid(error.to_string()))?;
 
@@ -585,4 +588,55 @@ fn switch_library(
 
     log::info!("library switched to {}", db_path.display());
     Ok(())
+}
+
+/// Attach a file that exists only as bytes - an image pasted from the
+/// clipboard, or a file copied in the file manager, which the web view hands
+/// over as contents without a path. The bytes travel as the raw request body
+/// (no JSON encoding of a large array); the target snippet and the file's name
+/// come as headers, percent-encoded.
+#[tauri::command]
+pub fn add_attachment_data(state: State<'_, AppState>, request: tauri::ipc::Request<'_>) -> Result<Snippet> {
+    let tauri::ipc::InvokeBody::Raw(bytes) = request.body() else {
+        return Err(Error::invalid("There is nothing to attach."));
+    };
+    let header = |name: &str| -> Result<String> {
+        let raw = request
+            .headers()
+            .get(name)
+            .and_then(|value| value.to_str().ok())
+            .ok_or_else(|| Error::invalid("The attachment request was incomplete."))?;
+        Ok(percent_decode(raw))
+    };
+    let snippet_id = header("x-snippet-id")?;
+    let name = header("x-file-name")?;
+
+    let stored = state.db().attachments().add_bytes(&name, bytes)?;
+    let mime = attachments::mime_for(&stored.name);
+    state
+        .db()
+        .with(|conn| db::attachments::add(conn, &snippet_id, &stored, mime))?;
+
+    let snippet = state
+        .db()
+        .with(|conn| db::snippets::get(conn, &snippet_id))?;
+    Ok(with_presence(&state, snippet))
+}
+
+fn percent_decode(raw: &str) -> String {
+    let bytes = raw.as_bytes();
+    let mut out = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            if let Ok(value) = u8::from_str_radix(&raw[i + 1..i + 3], 16) {
+                out.push(value);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(bytes[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
 }

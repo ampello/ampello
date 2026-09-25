@@ -97,6 +97,14 @@ impl Database {
         f(&mut guard)
     }
 
+    /// A counter SQLite bumps whenever a *different* connection - another
+    /// Ampello running under another account, in a shared library - commits.
+    /// Writes made through this connection never change it, so a change means
+    /// someone else edited the library.
+    pub fn data_version(&self) -> Result<i64> {
+        self.with(|conn| Ok(conn.query_row("PRAGMA data_version", [], |row| row.get(0))?))
+    }
+
     pub fn path(&self) -> &Path {
         &self.path
     }

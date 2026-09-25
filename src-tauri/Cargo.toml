@@ -3,7 +3,7 @@ members = ["crates/ampello-core"]
 
 [package]
 name = "ampello"
-version = "0.1.0"
+version = "0.2.0"
 description = "Ampello - universal text expansion"
 authors = ["Yohann Joachim"]
 edition = "2021"
@@ -46,5 +46,5 @@ windows-sys = { version = "0.61", features = [
 codegen-units = 1
 lto = true
 opt-level = "s"
-panic = "abort"
+panic = "unwind"
 strip = true
