@@ -34,9 +34,15 @@ impl Resolved {
 }
 
 pub fn default_shared_dir() -> PathBuf {
-    let public = std::env::var_os("PUBLIC")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from(r"C:\Users\Public"));
+    // `/Users/Shared` is the macOS counterpart: readable and writable by every
+    // account on the machine.
+    let public = if cfg!(target_os = "macos") {
+        PathBuf::from("/Users/Shared")
+    } else {
+        std::env::var_os("PUBLIC")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| PathBuf::from(r"C:\Users\Public"))
+    };
     public.join(PUBLIC_FOLDER)
 }
 
@@ -116,6 +122,35 @@ pub fn probe(dir: &Path) -> std::io::Result<()> {
     std::fs::create_dir_all(dir)?;
     writable(dir)
 }
+
+/// Let every account on the machine use a shared library.
+///
+/// On macOS a file takes its owner's default permissions, so the folder and
+/// database another account created would be readable but not writable to the
+/// rest: their edits would fail, or never reach the first account. Windows
+/// hands out the permissions of the parent folder, so nothing is needed there.
+/// Best effort: only the owner of a file may change its mode, so each account
+/// loosens what it created.
+#[cfg(unix)]
+pub fn share_permissions(dir: &Path) {
+    use std::os::unix::fs::PermissionsExt;
+
+    let loosen = |path: &Path, mode: u32| {
+        if path.exists() {
+            let _ = std::fs::set_permissions(path, std::fs::Permissions::from_mode(mode));
+        }
+    };
+    let attachments = dir.join("attachments");
+    let _ = std::fs::create_dir_all(&attachments);
+    loosen(dir, 0o777);
+    loosen(&attachments, 0o777);
+    for name in [DATABASE, "ampello.db-wal", "ampello.db-shm"] {
+        loosen(&dir.join(name), 0o666);
+    }
+}
+
+#[cfg(not(unix))]
+pub fn share_permissions(_dir: &Path) {}
 
 // Checked by writing rather than by reading permissions: an account can hold
 // rights it cannot use, and a folder on a disconnected drive reports nothing

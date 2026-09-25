@@ -80,6 +80,27 @@ export const addAttachments = (snippetId: string, paths: string[]) =>
 export const pickAttachments = (snippetId: string) =>
   call<Snippet | null>("pick_attachments", { snippetId });
 
+export async function addAttachmentData(
+  snippetId: string,
+  name: string,
+  bytes: Uint8Array,
+): Promise<Snippet> {
+  if (!isTauri()) throw new IpcError("add_attachment_data", "Ampello's core is not available.");
+  try {
+    return (await invoke("add_attachment_data", bytes, {
+      headers: {
+        "x-snippet-id": encodeURIComponent(snippetId),
+        "x-file-name": encodeURIComponent(name),
+      },
+    })) as Snippet;
+  } catch (raw) {
+    throw new IpcError(
+      "add_attachment_data",
+      typeof raw === "string" ? raw : raw instanceof Error ? raw.message : JSON.stringify(raw),
+    );
+  }
+}
+
 export const removeAttachment = (id: string) =>
   call<Snippet>("remove_attachment", { id });
 

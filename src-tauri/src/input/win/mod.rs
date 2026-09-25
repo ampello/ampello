@@ -31,86 +31,7 @@ use ampello_core::engine::{BoundaryMode, Engine, Expansion, Key, Trigger};
 
 use super::{EngineStatus, ExpandedCallback};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum InjectionMode {
-    Auto,
-    Paste,
-    Type,
-}
-
-impl InjectionMode {
-    fn parse(value: &str) -> Self {
-        match value {
-            "paste" => InjectionMode::Paste,
-            "type" => InjectionMode::Type,
-            _ => InjectionMode::Auto,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ClipboardMode {
-    Paste,
-    Type,
-}
-
-impl ClipboardMode {
-    fn parse(value: &str) -> Self {
-        match value {
-            "paste" => ClipboardMode::Paste,
-            _ => ClipboardMode::Type,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum TypingSpeed {
-    Fast,
-    Balanced,
-    Careful,
-}
-
-impl TypingSpeed {
-    fn parse(value: &str) -> Self {
-        match value {
-            "fast" => TypingSpeed::Fast,
-            "careful" => TypingSpeed::Careful,
-            _ => TypingSpeed::Balanced,
-        }
-    }
-
-    pub fn events_per_second(self) -> u32 {
-        match self {
-            TypingSpeed::Fast => 500,
-            TypingSpeed::Balanced => 300,
-            TypingSpeed::Careful => 120,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct Config {
-    pub preserve_terminator: bool,
-    pub restore_clipboard: bool,
-    pub injection: InjectionMode,
-    pub typing: TypingSpeed,
-    pub clipboard: ClipboardMode,
-
-    pub attachment_settle_ms: u64,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            preserve_terminator: true,
-            restore_clipboard: true,
-            injection: InjectionMode::Auto,
-            typing: TypingSpeed::Balanced,
-            clipboard: ClipboardMode::Type,
-            attachment_settle_ms: 500,
-        }
-    }
-}
+pub use super::config::{ClipboardMode, Config, InjectionMode, TypingSpeed};
 
 struct Shared {
     engine: Mutex<Engine>,
@@ -493,7 +414,10 @@ unsafe fn translate(vk: u16, scan_code: u32, state: &[u8; 256]) -> Option<String
         state.as_ptr(),
         buffer.as_mut_ptr(),
         buffer.len() as i32,
-        0,
+        // Bit 2: leave the keyboard's dead-key state alone. Without it every
+        // translation consumes a pending accent, corrupting what the user is
+        // typing in the application.
+        0x4,
         layout,
     );
 

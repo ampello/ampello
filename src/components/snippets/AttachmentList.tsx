@@ -21,6 +21,7 @@ import { Menu } from "@/components/ui/Menu";
 import * as ipc from "@/lib/ipc";
 import { cn } from "@/lib/cn";
 import { useFileDrop } from "@/lib/fileDrop";
+import { nameForPasted, usePasteFiles } from "@/lib/pasteFiles";
 import { reportError, useToastStore } from "@/stores/toastStore";
 import type { Attachment, Snippet } from "@/lib/types";
 
@@ -41,6 +42,21 @@ export function AttachmentList({
       return;
     }
     void run(() => ipc.addAttachments(snippet.id, paths), true);
+  });
+
+  usePasteFiles((files) => {
+    if (!snippet) {
+      pushToast("info", "Save this snippet before attaching files to it.");
+      return;
+    }
+    void run(async () => {
+      let updated: Snippet | null = null;
+      for (const [index, file] of files.entries()) {
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        updated = await ipc.addAttachmentData(snippet.id, nameForPasted(file, index), bytes);
+      }
+      return updated;
+    }, true);
   });
 
   if (!snippet) {

@@ -24,6 +24,9 @@ pub const OPEN_SETTINGS_EVENT: &str = "ampello://open-settings";
 
 pub const LIBRARY_EVENT: &str = "ampello://library-changed";
 
+/// Another running copy of Ampello edited the library we have open.
+pub const EXTERNAL_CHANGE_EVENT: &str = "ampello://external-change";
+
 pub const HIDDEN_FLAG: &str = "--hidden";
 
 pub fn run() {
@@ -78,6 +81,9 @@ pub fn run() {
             );
 
             let database = Arc::new(Database::open(&db_path)?);
+            if location.shared {
+                library::share_permissions(&location.dir);
+            }
             if let Some(damaged) = database.recovered_from() {
                 log::error!(
                     "the previous database could not be read; it is kept at {}",
@@ -99,7 +105,9 @@ pub fn run() {
             if start_hidden {
                 log::info!("started by the system; staying in the tray");
             }
+            let watch_library = Arc::clone(&library);
             app.manage(AppState::new(library, input, start_hidden));
+            watch_for_external_changes(app.handle().clone(), watch_library);
 
             let handle = app.handle().clone();
             tray::create(&handle, settings.expansion_enabled)?;
@@ -131,6 +139,7 @@ pub fn run() {
             commands::trigger_available,
             commands::add_attachments,
             commands::pick_attachments,
+            commands::add_attachment_data,
             commands::remove_attachment,
             commands::reorder_attachments,
             commands::attachment_bytes,
@@ -154,25 +163,33 @@ pub fn run() {
         ])
         .build(tauri::generate_context!())
         .expect("Ampello failed to start")
-        .run(|app, event| {
-            if let tauri::RunEvent::Exit = event {
+        .run(|app, event| match event {
+            tauri::RunEvent::Exit => {
                 if let Some(state) = app.try_state::<AppState>() {
                     state.input.shutdown();
                 }
             }
+            // Clicking the Dock icon while the window is hidden in the tray.
+            #[cfg(target_os = "macos")]
+            tauri::RunEvent::Reopen { .. } => window::show(app),
+            _ => {}
         });
 }
 
-/// Where the library lives: `%APPDATA%\Ampello`, the form ordinary Windows
-/// applications use, rather than a reverse-DNS bundle identifier.
+/// Where the library lives: `%APPDATA%\Ampello` on Windows and
+/// `~/Library/Application Support/Ampello` on macOS, the forms ordinary
+/// applications on each use, rather than a reverse-DNS bundle identifier.
 pub fn data_dir() -> std::path::PathBuf {
     if let Some(appdata) = std::env::var_os("APPDATA") {
         return std::path::PathBuf::from(appdata).join("Ampello");
     }
-    std::env::var_os("HOME")
+    let home = std::env::var_os("HOME")
         .map(std::path::PathBuf::from)
-        .unwrap_or_else(|| std::path::PathBuf::from("."))
-        .join(".local/share/ampello")
+        .unwrap_or_else(|| std::path::PathBuf::from("."));
+    if cfg!(target_os = "macos") {
+        return home.join("Library/Application Support/Ampello");
+    }
+    home.join(".local/share/ampello")
 }
 
 // Locations the library has previously occupied, newest first. Each rename,
@@ -244,5 +261,60 @@ pub fn apply_desktop_settings(app: &AppHandle, settings: &Settings) {
     let problem = shortcut::apply(app, settings);
     if let Some(state) = app.try_state::<AppState>() {
         *state.shortcut_error.lock() = problem;
+    }
+}
+
+/// Notice edits made by another running copy of Ampello.
+///
+/// Two accounts pointed at one shared library each hold their own open
+/// connection; nothing told the other one that a snippet had changed, so its
+/// window and its expansion engine stayed stale until a restart. SQLite exposes
+/// a per-connection counter that moves when any *other* connection commits, so
+/// a cheap poll is enough to know when to reload.
+fn watch_for_external_changes(app: AppHandle, library: Arc<state::Library>) {
+    let spawned = std::thread::Builder::new()
+        .name("ampello-library-watch".into())
+        .spawn(move || {
+            let mut watched = library.db();
+            let mut seen = watched.data_version().ok();
+            loop {
+                std::thread::sleep(std::time::Duration::from_millis(1000));
+                {
+                    let location = library.location();
+                    if location.shared {
+                        library::share_permissions(&location.dir);
+                    }
+                }
+
+                let current = library.db();
+                if !Arc::ptr_eq(&current, &watched) {
+                    // The library was exchanged in-process; the switch already
+                    // told the interface, so only the baseline resets.
+                    watched = current;
+                    seen = watched.data_version().ok();
+                    continue;
+                }
+
+                let version = match watched.data_version() {
+                    Ok(version) => version,
+                    Err(error) => {
+                        log::warn!("could not check the library for changes: {error}");
+                        continue;
+                    }
+                };
+                if seen == Some(version) {
+                    continue;
+                }
+                seen = Some(version);
+
+                log::info!("the library was changed by another Ampello; reloading");
+                if let Some(state) = app.try_state::<AppState>() {
+                    state.input.refresh();
+                }
+                let _ = app.emit(EXTERNAL_CHANGE_EVENT, ());
+            }
+        });
+    if let Err(error) = spawned {
+        log::warn!("could not watch the library for changes: {error}");
     }
 }

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+import { isMac, modKey } from "@/lib/platform";
 import { useEffect, useState } from "react";
 import { Kbd } from "./Kbd";
 import { Button } from "./Button";
@@ -27,7 +28,13 @@ export function ShortcutRecorder({ value, onChange }: ShortcutRecorderProps) {
       if (!key) return;
 
       const parts: string[] = [];
-      if (event.ctrlKey || event.metaKey) parts.push("CommandOrControl");
+      if (isMac) {
+        // Control and Command are different keys on a Mac.
+        if (event.ctrlKey) parts.push("Control");
+        if (event.metaKey) parts.push("Command");
+      } else if (event.ctrlKey || event.metaKey) {
+        parts.push("CommandOrControl");
+      }
       if (event.altKey) parts.push("Alt");
       if (event.shiftKey) parts.push("Shift");
       if (parts.length === 0) return;
@@ -65,7 +72,11 @@ export function ShortcutRecorder({ value, onChange }: ShortcutRecorderProps) {
 export function humanise(accelerator: string): string {
   return accelerator
     .split("+")
-    .map((part) => (part === "CommandOrControl" || part === "CmdOrCtrl" ? "Ctrl" : part))
+    .map((part) => {
+      if (part === "CommandOrControl" || part === "CmdOrCtrl") return modKey;
+      if (isMac) return MAC_NAMES[part] ?? part;
+      return part;
+    })
     .join(" ");
 }
 
@@ -115,3 +126,14 @@ function keyName(code: string): string | null {
       return null;
   }
 }
+
+const MAC_NAMES: Record<string, string> = {
+  Command: "⌘",
+  Cmd: "⌘",
+  Super: "⌘",
+  Control: "⌃",
+  Ctrl: "⌃",
+  Alt: "⌥",
+  Option: "⌥",
+  Shift: "⇧",
+};

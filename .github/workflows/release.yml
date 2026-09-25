@@ -97,9 +97,64 @@ jobs:
           name: ampello-${{ matrix.arch }}
           path: artifacts/*
 
+  build-mac:
+    name: ${{ matrix.label }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: macOS Apple Silicon
+            target: aarch64-apple-darwin
+            arch: arm64
+          - label: macOS Intel
+            target: x86_64-apple-darwin
+            arch: x64
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: ${{ matrix.target }}
+
+      - run: npm ci
+
+      - name: Build disk image
+        run: npm run tauri build -- --target ${{ matrix.target }}
+
+      - name: Collect artifacts
+        run: |
+          version="${{ github.event.inputs.tag || github.ref_name }}"
+          version="${version#v}"
+          mkdir -p artifacts
+          dmg=$(find "src-tauri/target/${{ matrix.target }}/release/bundle/dmg" -name '*.dmg' | head -n 1)
+          [ -n "$dmg" ] || { echo "no disk image was produced"; exit 1; }
+          name="Ampello_${version}_${{ matrix.arch }}-mac.dmg"
+          cp "$dmg" "artifacts/$name"
+          (cd artifacts && shasum -a 256 "$name" | sed 's/ \*/  /' > "SHA256SUMS-mac-${{ matrix.arch }}.txt")
+          ls artifacts
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ampello-mac-${{ matrix.arch }}
+          path: artifacts/*
+
   release:
     name: Publish
-    needs: build
+    needs: [build, build-mac]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -113,7 +168,7 @@ jobs:
           cat SHA256SUMS-*.txt | sort -k2 > SHA256SUMS && rm SHA256SUMS-*.txt
           echo "--- SHA256SUMS ---"; cat SHA256SUMS
           # Every uploaded binary must appear, or the release ships unverifiable.
-          binaries=$(ls *.exe | wc -l)
+          binaries=$(ls *.exe *.dmg | wc -l)
           listed=$(wc -l < SHA256SUMS)
           if [ "$binaries" -ne "$listed" ]; then
             echo "::error::$binaries binaries but $listed checksums"
@@ -136,6 +191,12 @@ jobs:
 
             * **x64**: `Ampello_*_x64-setup.exe`
             * **ARM64**: `Ampello_*_arm64-setup.exe`
+            * **macOS (Apple Silicon)**: `Ampello_*_arm64-mac.dmg`
+            * **macOS (Intel)**: `Ampello_*_x64-mac.dmg`
+
+            On macOS, open Ampello, then switch it on under System Settings >
+            Privacy & Security > Accessibility and Input Monitoring. The app is
+            unsigned: right-click it and choose Open the first time.
 
             Portable executables are included for use without installing.
 
