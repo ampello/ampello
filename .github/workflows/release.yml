@@ -152,9 +152,59 @@ jobs:
           name: ampello-mac-${{ matrix.arch }}
           path: artifacts/*
 
+  build-linux:
+    name: Linux x64
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - name: System libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev \
+            librsvg2-dev libxdo-dev libssl-dev patchelf
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: npm ci
+
+      - name: Build packages
+        run: npm run tauri build
+
+      - name: Collect artifacts
+        run: |
+          version="${{ github.event.inputs.tag || github.ref_name }}"
+          version="${version#v}"
+          mkdir -p artifacts
+          bundle=src-tauri/target/release/bundle
+          deb=$(find "$bundle/deb" -name '*.deb' | head -n 1)
+          image=$(find "$bundle/appimage" -name '*.AppImage' | head -n 1)
+          [ -n "$deb" ] && [ -n "$image" ] || { echo "a package was not produced"; exit 1; }
+          cp "$deb" "artifacts/Ampello_${version}_amd64.deb"
+          cp "$image" "artifacts/Ampello_${version}_x64.AppImage"
+          (cd artifacts && sha256sum *.deb *.AppImage > SHA256SUMS-linux-x64.txt)
+          ls artifacts
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ampello-linux-x64
+          path: artifacts/*
+
   release:
     name: Publish
-    needs: [build, build-mac]
+    needs: [build, build-mac, build-linux]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -168,7 +218,7 @@ jobs:
           cat SHA256SUMS-*.txt | sort -k2 > SHA256SUMS && rm SHA256SUMS-*.txt
           echo "--- SHA256SUMS ---"; cat SHA256SUMS
           # Every uploaded binary must appear, or the release ships unverifiable.
-          binaries=$(ls *.exe *.dmg | wc -l)
+          binaries=$(ls *.exe *.dmg *.deb *.AppImage | wc -l)
           listed=$(wc -l < SHA256SUMS)
           if [ "$binaries" -ne "$listed" ]; then
             echo "::error::$binaries binaries but $listed checksums"
@@ -193,6 +243,10 @@ jobs:
             * **ARM64**: `Ampello_*_arm64-setup.exe`
             * **macOS (Apple Silicon)**: `Ampello_*_arm64-mac.dmg`
             * **macOS (Intel)**: `Ampello_*_x64-mac.dmg`
+            * **Linux (x64)**: `Ampello_*_amd64.deb` or `Ampello_*_x64.AppImage`
+
+            On Linux, log in with an X11 session (Wayland does not allow global
+            keystroke watching) and install `xclip` for clipboard features.
 
             On macOS, open Ampello, then switch it on under System Settings >
             Privacy & Security > Accessibility and Input Monitoring. The app is

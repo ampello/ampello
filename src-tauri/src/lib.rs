@@ -113,6 +113,27 @@ pub fn run() {
             tray::create(&handle, settings.expansion_enabled)?;
             apply_desktop_settings(&handle, &settings);
 
+            // The window is created here rather than from the configuration so
+            // the web view's cache can live beside the library in Ampello's own
+            // folder. Left to itself the web view makes a folder named after the
+            // bundle identifier (com.yohann.ampello) under Local AppData.
+            let window_config = app
+                .config()
+                .app
+                .windows
+                .iter()
+                .find(|window| window.label == window::MAIN)
+                .cloned()
+                .ok_or("the main window is missing from the configuration")?;
+            #[allow(unused_mut)]
+            let mut window_builder =
+                tauri::WebviewWindowBuilder::from_config(app.handle(), &window_config)?;
+            #[cfg(windows)]
+            {
+                window_builder = window_builder.data_directory(data_dir.join("webview"));
+            }
+            window_builder.build()?;
+
             Ok(())
         })
         .on_window_event(|window, event| {
@@ -186,6 +207,11 @@ pub fn data_dir() -> std::path::PathBuf {
     let home = std::env::var_os("HOME")
         .map(std::path::PathBuf::from)
         .unwrap_or_else(|| std::path::PathBuf::from("."));
+    if let Some(xdg) = std::env::var_os("XDG_DATA_HOME").filter(|value| !value.is_empty()) {
+        if cfg!(target_os = "linux") {
+            return std::path::PathBuf::from(xdg).join("ampello");
+        }
+    }
     if cfg!(target_os = "macos") {
         return home.join("Library/Application Support/Ampello");
     }
