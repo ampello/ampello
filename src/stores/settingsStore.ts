@@ -15,6 +15,7 @@ export const DEFAULT_SETTINGS: Settings = {
   restoreClipboard: true,
   injectionMode: "auto",
   typingSpeed: "balanced",
+  cancelKey: "Escape",
   clipboardShortcutEnabled: true,
   clipboardShortcut: "CommandOrControl+Shift+V",
   clipboardMode: "type",

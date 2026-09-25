@@ -19,6 +19,9 @@ pub struct Settings {
 
     pub typing_speed: String,
 
+    /// The key that stops an insertion; see `CancelKey`.
+    pub cancel_key: String,
+
     pub clipboard_shortcut_enabled: bool,
 
     pub clipboard_shortcut: String,
@@ -41,6 +44,7 @@ impl Default for Settings {
             restore_clipboard: true,
             injection_mode: "auto".into(),
             typing_speed: "balanced".into(),
+            cancel_key: "Escape".into(),
             clipboard_shortcut_enabled: true,
             // Cmd+Shift+V is "paste and match style" in most Mac applications.
             clipboard_shortcut: if cfg!(target_os = "macos") {
@@ -78,6 +82,8 @@ pub struct SettingsPatch {
     #[serde(default)]
     pub typing_speed: Option<String>,
     #[serde(default)]
+    pub cancel_key: Option<String>,
+    #[serde(default)]
     pub clipboard_shortcut_enabled: Option<bool>,
     #[serde(default)]
     pub clipboard_shortcut: Option<String>,
@@ -98,6 +104,7 @@ const PRESERVE_BOUNDARY_CHAR: &str = "preserve_boundary_char";
 const RESTORE_CLIPBOARD: &str = "restore_clipboard";
 const INJECTION_MODE: &str = "injection_mode";
 const TYPING_SPEED: &str = "typing_speed";
+const CANCEL_KEY: &str = "cancel_key";
 const CLIPBOARD_SHORTCUT_ENABLED: &str = "clipboard_shortcut_enabled";
 const CLIPBOARD_SHORTCUT: &str = "clipboard_shortcut";
 const CLIPBOARD_MODE: &str = "clipboard_mode";
@@ -123,6 +130,9 @@ pub fn load(conn: &Connection) -> Result<Settings> {
             .unwrap_or(defaults.restore_clipboard),
         injection_mode: read_str(conn, INJECTION_MODE)?.unwrap_or(defaults.injection_mode),
         typing_speed: read_str(conn, TYPING_SPEED)?.unwrap_or(defaults.typing_speed),
+        cancel_key: read_str(conn, CANCEL_KEY)?
+            .filter(|value| crate::cancel::CancelKey::parse(value).is_some())
+            .unwrap_or(defaults.cancel_key),
         clipboard_shortcut_enabled: read_bool(conn, CLIPBOARD_SHORTCUT_ENABLED)?
             .unwrap_or(defaults.clipboard_shortcut_enabled),
         clipboard_shortcut: read_str(conn, CLIPBOARD_SHORTCUT)?
@@ -182,6 +192,14 @@ pub fn apply(conn: &Connection, patch: SettingsPatch) -> Result<Settings> {
             ));
         }
         write_str(conn, TYPING_SPEED, value)?;
+    }
+    if let Some(value) = patch.cancel_key.as_deref() {
+        let Some(key) = crate::cancel::CancelKey::parse(value) else {
+            return Err(Error::invalid(
+                "The cancel key must be Escape, Pause, ScrollLock or F1 to F12.",
+            ));
+        };
+        write_str(conn, CANCEL_KEY, &key.name())?;
     }
     if let Some(value) = patch.clipboard_shortcut_enabled {
         write_bool(conn, CLIPBOARD_SHORTCUT_ENABLED, value)?;

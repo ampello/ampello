@@ -706,3 +706,36 @@ fn another_connections_edit_is_noticed_and_our_own_is_not() {
 
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+#[test]
+fn the_cancel_key_defaults_to_escape_and_only_accepts_offered_keys() {
+    use crate::db::settings::SettingsPatch;
+
+    let db = db();
+    let loaded = db.with(settings::load).unwrap();
+    assert_eq!(loaded.cancel_key, "Escape");
+
+    let changed = db
+        .with(|conn| {
+            settings::apply(
+                conn,
+                SettingsPatch {
+                    cancel_key: Some("Pause".into()),
+                    ..Default::default()
+                },
+            )
+        })
+        .unwrap();
+    assert_eq!(changed.cancel_key, "Pause");
+
+    let refused = db.with(|conn| {
+        settings::apply(
+            conn,
+            SettingsPatch {
+                cancel_key: Some("Enter".into()),
+                ..Default::default()
+            },
+        )
+    });
+    assert!(refused.is_err());
+}

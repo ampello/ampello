@@ -2,7 +2,7 @@
 use std::cell::Cell;
 use std::mem::size_of;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, Ordering};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
 
@@ -142,8 +142,20 @@ pub fn clear_escape_pending() {
     ESCAPE_PENDING.store(false, Ordering::Release);
 }
 
+// The key that cancels an insertion, as a virtual-key code. Escape unless the
+// user chose another.
+static CANCEL_VK: AtomicU32 = AtomicU32::new(VK_ESCAPE as u32);
+
+pub fn set_cancel_vk(vk: u16) {
+    CANCEL_VK.store(vk as u32, Ordering::Release);
+}
+
+pub fn cancel_vk() -> u16 {
+    CANCEL_VK.load(Ordering::Acquire) as u16
+}
+
 fn escape_is_down() -> bool {
-    unsafe { (GetAsyncKeyState(VK_ESCAPE as i32) as u32) & 0x8000 != 0 }
+    unsafe { (GetAsyncKeyState(cancel_vk() as i32) as u32) & 0x8000 != 0 }
 }
 
 // Escape is polled rather than read from the hook: with an insertion in
@@ -159,7 +171,7 @@ fn watch_for_escape() {
             CANCEL.store(true, Ordering::Release);
             DISCARD.store(true, Ordering::Release);
             ESCAPE_PENDING.store(true, Ordering::Release);
-            log::info!("insertion stopped with Escape");
+            log::info!("insertion stopped with the cancel key");
             return;
         }
         thread::sleep(Duration::from_millis(8));
@@ -195,7 +207,7 @@ impl Guard {
             thread::Builder::new()
                 .name("ampello-cancel".into())
                 .spawn(watch_for_escape)
-                .map_err(|error| log::warn!("could not watch for Escape: {error}"))
+                .map_err(|error| log::warn!("could not watch for the cancel key: {error}"))
                 .ok()
         } else {
             None

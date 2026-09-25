@@ -25,7 +25,7 @@ use std::time::{Duration, Instant};
 use parking_lot::Mutex;
 
 use crate::state::Library;
-use ampello_core::db;
+use ampello_core::{db, CancelKey};
 use ampello_core::engine::{BoundaryMode, Engine, Expansion, Key, Trigger};
 
 use super::config::{ClipboardMode, Config, InjectionMode, TypingSpeed};
@@ -37,7 +37,7 @@ const MARKER: i64 = 0x414D_504C;
 
 const KEY_RETURN: u16 = 36;
 const KEY_DELETE: u16 = 51;
-const KEY_ESCAPE: u16 = 53;
+
 const KEY_V: u16 = 9;
 
 const TYPEABLE_LIMIT: usize = 5_000;
@@ -179,6 +179,7 @@ impl InputService {
             typing: TypingSpeed::parse(&settings.typing_speed),
             clipboard: ClipboardMode::parse(&settings.clipboard_mode),
             attachment_settle_ms: settings.attachment_settle_ms.max(0) as u64,
+            cancel: CancelKey::parse(&settings.cancel_key).unwrap_or_default(),
         };
 
         let mut engine = self.shared.engine.lock();
@@ -455,7 +456,7 @@ fn worker(
             }
             Err(error) if error == CANCELLED => {
                 log::info!("expansion of snippet {} cancelled", expansion.snippet_id);
-                *shared.last_error.lock() = Some("Stopped with Escape part-way through.".into());
+                *shared.last_error.lock() = Some("Stopped with the cancel key part-way through.".into());
             }
             Err(error) => {
                 log::warn!("expansion of snippet {} failed: {error}", expansion.snippet_id);
@@ -470,19 +471,19 @@ fn insert_clipboard(config: Config) -> Result<(), String> {
     wait_for_modifiers_release(Duration::from_millis(1_200));
 
     if config.clipboard == ClipboardMode::Paste {
-        let guard = Guard::new(config.typing);
+        let guard = Guard::new(config.typing, config.cancel);
         return paste_shortcut(&guard);
     }
 
     let Some(text) = clipboard::get_text()? else {
         log::info!("clipboard shortcut: the clipboard is not text, pasting instead");
-        let guard = Guard::new(config.typing);
+        let guard = Guard::new(config.typing, config.cancel);
         return paste_shortcut(&guard);
     };
     if text.is_empty() {
         return Ok(());
     }
-    let guard = Guard::new(config.typing);
+    let guard = Guard::new(config.typing, config.cancel);
     type_text(&text, &guard)
 }
 
@@ -516,7 +517,7 @@ fn expand(library: &Library, expansion: &Expansion, config: Config) -> Result<()
     // events must not inherit them.
     wait_for_modifiers_release(Duration::from_millis(300));
 
-    let guard = Guard::new(config.typing);
+    let guard = Guard::new(config.typing, config.cancel);
     erase(expansion.trigger.chars().count(), &guard)?;
 
     deliver_payload(
@@ -615,18 +616,21 @@ fn wait_for_modifiers_release(limit: Duration) {
 // --- Cancelling and pacing -------------------------------------------------
 
 struct Guard {
-    // Escape may still be down from before the insertion began; it only
+    // The cancel key may still be down from before the insertion began; it only
     // cancels once it has been released and pressed again.
+    keycode: u16,
     armed: Cell<bool>,
     interval: Duration,
     next: Cell<Option<Instant>>,
 }
 
 impl Guard {
-    fn new(speed: TypingSpeed) -> Self {
+    fn new(speed: TypingSpeed, cancel: CancelKey) -> Self {
+        let keycode = keycode_of(cancel);
         CANCEL.store(false, Ordering::Release);
         Self {
-            armed: Cell::new(!escape_down()),
+            keycode,
+            armed: Cell::new(!key_down(keycode)),
             interval: Duration::from_nanos(1_000_000_000 / speed.events_per_second().max(1) as u64),
             next: Cell::new(None),
         }
@@ -636,11 +640,11 @@ impl Guard {
         if CANCEL.load(Ordering::Acquire) {
             return Err(CANCELLED.into());
         }
-        if !escape_down() {
+        if !key_down(self.keycode) {
             self.armed.set(true);
         } else if self.armed.get() {
             CANCEL.store(true, Ordering::Release);
-            log::info!("insertion stopped with Escape");
+            log::info!("insertion stopped with the cancel key");
             return Err(CANCELLED.into());
         }
         Ok(())
@@ -661,8 +665,20 @@ impl Guard {
     }
 }
 
-fn escape_down() -> bool {
-    unsafe { CGEventSourceKeyState(HID_SYSTEM_STATE, KEY_ESCAPE) }
+fn key_down(keycode: u16) -> bool {
+    unsafe { CGEventSourceKeyState(HID_SYSTEM_STATE, keycode) }
+}
+
+// Virtual key codes. A Mac keyboard has no Pause or Scroll Lock, so those two
+// stand for F15 and F14, which is where those keys sit on an extended one.
+fn keycode_of(key: CancelKey) -> u16 {
+    const FUNCTION: [u16; 12] = [122, 120, 99, 118, 96, 97, 98, 100, 101, 109, 103, 111];
+    match key {
+        CancelKey::Escape => 53,
+        CancelKey::Pause => 113,
+        CancelKey::ScrollLock => 107,
+        CancelKey::Function(number) => FUNCTION[(number as usize - 1).min(11)],
+    }
 }
 
 // --- Delivering a payload --------------------------------------------------
