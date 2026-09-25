@@ -10,7 +10,7 @@ use windows_sys::Win32::System::DataExchange::{
     RegisterClipboardFormatW, SetClipboardData,
 };
 use windows_sys::Win32::System::Memory::{
-    GlobalAlloc, GlobalLock, GlobalSize, GlobalUnlock, GMEM_MOVEABLE,
+    GlobalAlloc, GlobalFlags, GlobalLock, GlobalSize, GlobalUnlock, GMEM_MOVEABLE,
 };
 
 const CF_UNICODETEXT: u32 = 13;
@@ -20,6 +20,9 @@ const CF_HDROP: u32 = 15;
 // that honours the drop effect - Explorer above all - may delete the file it
 // read, which is the one in the attachment store.
 const DROPEFFECT_COPY: u32 = 2;
+
+// What `GlobalFlags` reports for a value that is not a global memory handle.
+const GMEM_INVALID_HANDLE: u32 = 0x8000;
 
 const MAX_FORMAT_BYTES: usize = 16 * 1024 * 1024;
 const MAX_TOTAL_BYTES: usize = 48 * 1024 * 1024;
@@ -56,6 +59,19 @@ impl Drop for Session {
     }
 }
 
+// Formats whose clipboard "handle" is not a global memory block: GDI objects
+// (bitmaps, palettes, enhanced metafiles), owner-display formats and the GDI
+// object range. Treating one as memory - asking its size, locking it, copying
+// out of it - reads through an arbitrary value and corrupts the heap, which
+// killed the application whenever an image was on the clipboard. Bitmaps
+// normally travel alongside a DIB, which is memory and is kept.
+fn is_handle_format(format: u32) -> bool {
+    matches!(
+        format,
+        2 | 3 | 9 | 14 | 0x0080 | 0x0082 | 0x0083 | 0x008E | 0x0200..=0x03FF
+    )
+}
+
 pub fn capture() -> Result<Snapshot, String> {
     let _session = Session::open()?;
 
@@ -70,8 +86,20 @@ pub fn capture() -> Result<Snapshot, String> {
             break;
         }
 
+        if is_handle_format(format) {
+            complete = false;
+            continue;
+        }
+
         let handle = unsafe { GetClipboardData(format) };
         if handle.is_null() {
+            complete = false;
+            continue;
+        }
+
+        // Whatever the format, confirm this really is global memory before
+        // touching it.
+        if unsafe { GlobalFlags(handle as HGLOBAL) } == GMEM_INVALID_HANDLE {
             complete = false;
             continue;
         }
@@ -239,5 +267,22 @@ fn allocate(bytes: &[u8]) -> Option<HGLOBAL> {
         ptr::copy_nonoverlapping(bytes.as_ptr(), pointer as *mut u8, bytes.len());
         GlobalUnlock(handle);
         Some(handle)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_handle_format;
+
+    #[test]
+    fn handle_formats_are_never_read_as_memory() {
+        // CF_BITMAP, CF_PALETTE, CF_ENHMETAFILE: what an image on the clipboard carries.
+        for format in [2u32, 9, 14, 0x82, 0x8E, 0x300, 0x3FF] {
+            assert!(is_handle_format(format), "{format:#x}");
+        }
+        // CF_TEXT, CF_DIB, CF_UNICODETEXT, CF_HDROP, CF_DIBV5, a registered format.
+        for format in [1u32, 8, 13, 15, 17, 0xC0A0] {
+            assert!(!is_handle_format(format), "{format:#x}");
+        }
     }
 }

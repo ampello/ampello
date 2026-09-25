@@ -30,6 +30,12 @@ pub const EXTERNAL_CHANGE_EVENT: &str = "ampello://external-change";
 pub const HIDDEN_FLAG: &str = "--hidden";
 
 pub fn run() {
+    // A panic on any thread is written to the log instead of vanishing with
+    // the console nobody sees, so a report of "it closed" has something in it.
+    std::panic::set_hook(Box::new(|info| {
+        log::error!("panic: {info}");
+    }));
+
     tauri::Builder::default()
         .plugin(
             tauri_plugin_log::Builder::new()
