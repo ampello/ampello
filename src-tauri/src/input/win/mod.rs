@@ -168,7 +168,7 @@ impl InputService {
             }
         };
 
-        *self.shared.config.lock() = Config {
+        let config = Config {
             preserve_terminator: settings.preserve_boundary_char,
             restore_clipboard: settings.restore_clipboard,
             injection: InjectionMode::parse(&settings.injection_mode),
@@ -177,7 +177,8 @@ impl InputService {
             attachment_settle_ms: settings.attachment_settle_ms.max(0) as u64,
             cancel: CancelKey::parse(&settings.cancel_key).unwrap_or_default(),
         };
-        inject::set_cancel_vk(vk_of(CancelKey::parse(&settings.cancel_key).unwrap_or_default()));
+        inject::set_cancel_vk(vk_of(config.cancel));
+        *self.shared.config.lock() = config;
 
         let mut engine = self.shared.engine.lock();
         engine.set_mode(BoundaryMode::parse(&settings.boundary_mode));

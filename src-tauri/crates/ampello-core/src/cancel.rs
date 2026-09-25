@@ -34,7 +34,9 @@ impl CancelKey {
             "ScrollLock" => Some(CancelKey::ScrollLock),
             _ => {
                 let number: u8 = value.strip_prefix('F')?.parse().ok()?;
-                (1..=12).contains(&number).then_some(CancelKey::Function(number))
+                (1..=12)
+                    .contains(&number)
+                    .then_some(CancelKey::Function(number))
             }
         }
     }
