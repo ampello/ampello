@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pub mod attachments;
 pub mod backup;
+pub mod cancel;
 pub mod db;
 pub mod engine;
 pub mod error;
@@ -10,6 +11,7 @@ pub mod models;
 mod perf_tests;
 
 pub use backup::{Backup, ImportMode, ImportReport};
+pub use cancel::CancelKey;
 pub use db::settings::{Settings, SettingsPatch};
 pub use db::Database;
 pub use engine::{BoundaryMode, Engine, Expansion, Key, Trigger};

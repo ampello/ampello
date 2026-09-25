@@ -57,6 +57,16 @@ const CLIPBOARD_OPTIONS = [
   { value: "paste" as const, label: "Paste" },
 ];
 
+const CANCEL_KEY_OPTIONS = [
+  { value: "Escape", label: "Esc" },
+  { value: "Pause", label: "Pause" },
+  { value: "ScrollLock", label: "Scroll Lock" },
+  ...Array.from({ length: 12 }, (_, index) => ({
+    value: `F${index + 1}`,
+    label: `F${index + 1}`,
+  })),
+];
+
 const SHORTCUTS: [string, string][] = [
   [`${modKey} N`, "New snippet"],
   [`${modKey} K`, "Search snippets"],
@@ -66,7 +76,7 @@ const SHORTCUTS: [string, string][] = [
   ["↑ ↓", "Move through the list"],
   ["Del", "Delete the selected snippet"],
   ["Esc", "Close the editor or a dialog"],
-  ["Esc", "Stop an expansion part-way through"],
+  ["Esc", "Stop an expansion part-way through (the cancel key in Settings)"],
 ];
 
 export function SettingsView() {
@@ -285,7 +295,7 @@ export function SettingsView() {
           <SettingsSection title="Insertion">
             <SettingsRow
               label="Insertion method"
-              hint="How a snippet reaches the application you are typing in. Auto sends short single-line snippets as keystrokes and uses the clipboard for anything longer, multi-line or indented. Leave this selected unless something is wrong. Paste always uses the clipboard: instant and exact, but the application has to accept Ctrl+V. Type always sends keystrokes and never touches the clipboard, for applications that refuse a paste; it is slower, and an application that ignores character-level tabs will lose the indentation. A long insertion can be stopped part-way with Escape."
+              hint="How a snippet reaches the application you are typing in. Auto sends short single-line snippets as keystrokes and uses the clipboard for anything longer, multi-line or indented. Leave this selected unless something is wrong. Paste always uses the clipboard: instant and exact, but the application has to accept Ctrl+V. Type always sends keystrokes and never touches the clipboard, for applications that refuse a paste; it is slower, and an application that ignores character-level tabs will lose the indentation. A long insertion can be stopped part-way with the cancel key (Esc unless you change it below)."
               control={
                 <SegmentedControl<InjectionMode>
                   label="Insertion method"
@@ -298,7 +308,7 @@ export function SettingsView() {
 
             <SettingsRow
               label="Typing speed"
-              hint="How fast a snippet is typed, when Ampello types it rather than pasting it. It goes in one character at a time, the way you would type it yourself: Fast is around 250 characters a second, Balanced around 150, and Careful around 60, which is about as quick as a fast typist. Slower is not only calmer to watch, it is more reliable. An application that cannot keep up queues the surplus somewhere Ampello can no longer reach, which is what makes a long insertion carry on typing after you have pressed Escape. Pasting is unaffected."
+              hint="How fast a snippet is typed, when Ampello types it rather than pasting it. It goes in one character at a time, the way you would type it yourself: Fast is around 250 characters a second, Balanced around 150, and Careful around 60, which is about as quick as a fast typist. Slower is not only calmer to watch, it is more reliable. An application that cannot keep up queues the surplus somewhere Ampello can no longer reach, which is what makes a long insertion carry on typing after you have pressed the cancel key. Pasting is unaffected."
               control={
                 <SegmentedControl<TypingSpeed>
                   label="Typing speed"
@@ -306,6 +316,25 @@ export function SettingsView() {
                   options={TYPING_OPTIONS}
                   onChange={(typingSpeed) => apply({ typingSpeed })}
                 />
+              }
+            />
+
+            <SettingsRow
+              label="Cancel key"
+              hint="The key that stops a long insertion part-way through. Escape by default, but applications use Escape too - a browser stops loading a page or leaves full screen on it - so pick a key you never press for anything else if that gets in the way. Only keys that are not text are offered. It applies to typed insertions; a paste lands all at once."
+              control={
+                <select
+                  aria-label="Cancel key"
+                  value={settings.cancelKey}
+                  onChange={(event) => apply({ cancelKey: event.target.value })}
+                  className="h-8 rounded-[8px] border border-border bg-surface px-2 text-[13px] text-primary focus:border-accent focus:outline-none"
+                >
+                  {CANCEL_KEY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               }
             />
 
@@ -397,7 +426,7 @@ export function SettingsView() {
 
             <SettingsRow
               label="Clipboard method"
-              hint="What the combination does. Type sends the clipboard as individual keystrokes at the typing speed set above, which is how text gets into an application that refuses a paste or reformats one; a long clipboard takes a while, and Escape stops it part-way. Paste sends a plain Ctrl+V, which is instant and exact. If the clipboard holds an image or a list of files there is nothing to type, so Ampello pastes either way."
+              hint="What the combination does. Type sends the clipboard as individual keystrokes at the typing speed set above, which is how text gets into an application that refuses a paste or reformats one; a long clipboard takes a while, and the cancel key stops it part-way. Paste sends a plain Ctrl+V, which is instant and exact. If the clipboard holds an image or a list of files there is nothing to type, so Ampello pastes either way."
               control={
                 <SegmentedControl<ClipboardMode>
                   label="Clipboard method"

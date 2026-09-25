@@ -81,6 +81,9 @@ export type InjectionMode = "auto" | "paste" | "type";
 
 export type TypingSpeed = "fast" | "balanced" | "careful";
 
+// The key that stops an insertion part-way through.
+export type CancelKey = string;
+
 export type ClipboardMode = "paste" | "type";
 
 export interface Settings {
@@ -95,6 +98,7 @@ export interface Settings {
   restoreClipboard: boolean;
   injectionMode: InjectionMode;
   typingSpeed: TypingSpeed;
+  cancelKey: CancelKey;
 
   clipboardShortcutEnabled: boolean;
 

@@ -32,7 +32,7 @@ use x11rb::protocol::xtest::ConnectionExt as _;
 use x11rb::rust_connection::RustConnection;
 
 use crate::state::Library;
-use ampello_core::db;
+use ampello_core::{db, CancelKey};
 use ampello_core::engine::{BoundaryMode, Engine, Expansion, Key, Trigger};
 
 use super::config::{ClipboardMode, Config, InjectionMode, TypingSpeed};
@@ -52,7 +52,7 @@ const MASK_LEVEL3: u16 = 0x80;
 const SYM_BACKSPACE: u32 = 0xff08;
 const SYM_TAB: u32 = 0xff09;
 const SYM_RETURN: u32 = 0xff0d;
-const SYM_ESCAPE: u32 = 0xff1b;
+
 const SYM_SHIFT_L: u32 = 0xffe1;
 const SYM_CONTROL_L: u32 = 0xffe3;
 const SYM_CONTROL_R: u32 = 0xffe4;
@@ -209,6 +209,7 @@ impl InputService {
             typing: TypingSpeed::parse(&settings.typing_speed),
             clipboard: ClipboardMode::parse(&settings.clipboard_mode),
             attachment_settle_ms: settings.attachment_settle_ms.max(0) as u64,
+            cancel: CancelKey::parse(&settings.cancel_key).unwrap_or_default(),
         };
 
         let mut engine = self.shared.engine.lock();
@@ -615,7 +616,7 @@ fn worker(
             }
             Err(error) if error == CANCELLED => {
                 log::info!("expansion of snippet {} cancelled", expansion.snippet_id);
-                *shared.last_error.lock() = Some("Stopped with Escape part-way through.".into());
+                *shared.last_error.lock() = Some("Stopped with the cancel key part-way through.".into());
             }
             Err(error) => {
                 log::warn!("expansion of snippet {} failed: {error}", expansion.snippet_id);
@@ -634,7 +635,7 @@ fn finish(shared: &Shared) {
 }
 
 fn insert_clipboard(config: Config) -> Result<(), String> {
-    let mut injector = Injector::new(config.typing)?;
+    let mut injector = Injector::new(config.typing, config.cancel)?;
     injector.wait_for_modifiers_release(Duration::from_millis(1_200));
 
     if config.clipboard == ClipboardMode::Paste {
@@ -672,7 +673,7 @@ fn expand(library: &Library, expansion: &Expansion, config: Config) -> Result<()
         }
     }
 
-    let mut injector = Injector::new(config.typing)?;
+    let mut injector = Injector::new(config.typing, config.cancel)?;
     injector.wait_for_modifiers_release(Duration::from_millis(300));
 
     // The boundary character was not swallowed, so it goes too.
@@ -705,7 +706,7 @@ struct Injector {
     borrowed: Option<u8>,
 
     escape: Option<u8>,
-    // Escape may still be down from before the insertion began; it only
+    // The cancel key may still be down from before the insertion began; it only
     // cancels once it has been released and pressed again.
     armed: Cell<bool>,
     interval: Duration,
@@ -713,7 +714,7 @@ struct Injector {
 }
 
 impl Injector {
-    fn new(speed: TypingSpeed) -> Result<Self, String> {
+    fn new(speed: TypingSpeed, cancel: CancelKey) -> Result<Self, String> {
         let (connection, screen) = RustConnection::connect(None)
             .map_err(|e| format!("Ampello could not connect to the X server: {e}"))?;
         let root = connection.setup().roots[screen].root;
@@ -723,7 +724,7 @@ impl Injector {
             .reply()
             .map_err(|_| "This X server does not offer the XTEST extension Ampello needs.".to_string())?;
         let keymap = Keymap::load(&connection)?;
-        let escape = keymap.find(SYM_ESCAPE).map(|(keycode, _)| keycode);
+        let escape = keymap.find(sym_of_cancel(cancel)).map(|(keycode, _)| keycode);
 
         let injector = Self {
             connection,
@@ -756,7 +757,7 @@ impl Injector {
         if !self.escape_down() {
             self.armed.set(true);
         } else if self.armed.get() {
-            log::info!("insertion stopped with Escape");
+            log::info!("insertion stopped with the cancel key");
             return Err(CANCELLED.into());
         }
         Ok(())
@@ -1033,4 +1034,13 @@ fn deliver_payload(
         }
     }
     outcome
+}
+
+fn sym_of_cancel(key: CancelKey) -> u32 {
+    match key {
+        CancelKey::Escape => 0xff1b,
+        CancelKey::Pause => 0xff13,
+        CancelKey::ScrollLock => 0xff14,
+        CancelKey::Function(number) => 0xffbe + (number as u32 - 1),
+    }
 }

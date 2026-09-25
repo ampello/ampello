@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+use ampello_core::CancelKey;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InjectionMode {
     Auto,
@@ -65,6 +67,8 @@ pub struct Config {
     pub clipboard: ClipboardMode,
 
     pub attachment_settle_ms: u64,
+
+    pub cancel: CancelKey,
 }
 
 impl Default for Config {
@@ -76,6 +80,7 @@ impl Default for Config {
             typing: TypingSpeed::Balanced,
             clipboard: ClipboardMode::Type,
             attachment_settle_ms: 500,
+            cancel: CancelKey::Escape,
         }
     }
 }

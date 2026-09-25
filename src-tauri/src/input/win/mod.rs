@@ -16,7 +16,7 @@ use windows_sys::Win32::Foundation::{LPARAM, LRESULT, WPARAM};
 use windows_sys::Win32::System::LibraryLoader::GetModuleHandleW;
 use windows_sys::Win32::System::Threading::GetCurrentThreadId;
 use windows_sys::Win32::UI::Input::KeyboardAndMouse::{
-    GetKeyboardLayout, MapVirtualKeyW, ToUnicodeEx, MAPVK_VK_TO_VSC, VK_BACK, VK_ESCAPE,
+    GetKeyboardLayout, MapVirtualKeyW, ToUnicodeEx, MAPVK_VK_TO_VSC, VK_BACK,
 };
 use windows_sys::Win32::UI::WindowsAndMessaging::{
     CallNextHookEx, GetForegroundWindow, GetMessageW, GetWindowThreadProcessId, PostThreadMessageW,
@@ -26,7 +26,7 @@ use windows_sys::Win32::UI::WindowsAndMessaging::{
 };
 
 use crate::state::Library;
-use ampello_core::db;
+use ampello_core::{db, CancelKey};
 use ampello_core::engine::{BoundaryMode, Engine, Expansion, Key, Trigger};
 
 use super::{EngineStatus, ExpandedCallback};
@@ -175,7 +175,9 @@ impl InputService {
             typing: TypingSpeed::parse(&settings.typing_speed),
             clipboard: ClipboardMode::parse(&settings.clipboard_mode),
             attachment_settle_ms: settings.attachment_settle_ms.max(0) as u64,
+            cancel: CancelKey::parse(&settings.cancel_key).unwrap_or_default(),
         };
+        inject::set_cancel_vk(vk_of(CancelKey::parse(&settings.cancel_key).unwrap_or_default()));
 
         let mut engine = self.shared.engine.lock();
         engine.set_mode(BoundaryMode::parse(&settings.boundary_mode));
@@ -311,16 +313,16 @@ unsafe fn on_key(wparam: WPARAM, lparam: LPARAM) -> bool {
     let vk = info.vkCode as u16;
 
     if shared.injecting.load(Ordering::Acquire) {
-        if down && vk == VK_ESCAPE {
+        if down && vk == inject::cancel_vk() {
             inject::request_cancel();
             inject::clear_escape_pending();
-            log::info!("expansion cancelled with Escape");
+            log::info!("expansion cancelled with the cancel key");
             return true;
         }
         return false;
     }
 
-    if vk == VK_ESCAPE && inject::escape_pending() {
+    if vk == inject::cancel_vk() && inject::escape_pending() {
         if up {
             inject::clear_escape_pending();
         }
@@ -474,7 +476,7 @@ fn worker(
             Err(error) if error == inject::CANCELLED => {
                 inject::finish_cancel();
                 log::info!("expansion of snippet {} cancelled", expansion.snippet_id);
-                *shared.last_error.lock() = Some("Stopped with Escape part-way through.".into());
+                *shared.last_error.lock() = Some("Stopped with the cancel key part-way through.".into());
             }
             Err(error) => {
                 log::warn!(
@@ -577,4 +579,13 @@ fn expand(
         log::warn!("could not record snippet usage: {error}");
     }
     Ok(())
+}
+
+fn vk_of(key: CancelKey) -> u16 {
+    match key {
+        CancelKey::Escape => 0x1B,
+        CancelKey::Pause => 0x13,
+        CancelKey::ScrollLock => 0x91,
+        CancelKey::Function(number) => 0x70 + (number as u16 - 1),
+    }
 }
