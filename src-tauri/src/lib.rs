@@ -207,6 +207,11 @@ pub fn data_dir() -> std::path::PathBuf {
     let home = std::env::var_os("HOME")
         .map(std::path::PathBuf::from)
         .unwrap_or_else(|| std::path::PathBuf::from("."));
+    if let Some(xdg) = std::env::var_os("XDG_DATA_HOME").filter(|value| !value.is_empty()) {
+        if cfg!(target_os = "linux") {
+            return std::path::PathBuf::from(xdg).join("ampello");
+        }
+    }
     if cfg!(target_os = "macos") {
         return home.join("Library/Application Support/Ampello");
     }

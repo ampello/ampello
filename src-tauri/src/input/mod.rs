@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 use serde::Serialize;
 
-#[cfg(any(windows, target_os = "macos"))]
+#[cfg(any(windows, target_os = "macos", target_os = "linux"))]
 mod config;
 
 #[cfg(windows)]
@@ -12,7 +12,11 @@ mod platform;
 #[path = "mac/mod.rs"]
 mod platform;
 
-#[cfg(not(any(windows, target_os = "macos")))]
+#[cfg(target_os = "linux")]
+#[path = "linux/mod.rs"]
+mod platform;
+
+#[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
 #[path = "stub.rs"]
 mod platform;
 

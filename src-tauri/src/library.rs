@@ -36,7 +36,10 @@ impl Resolved {
 pub fn default_shared_dir() -> PathBuf {
     // `/Users/Shared` is the macOS counterpart: readable and writable by every
     // account on the machine.
-    let public = if cfg!(target_os = "macos") {
+    let public = if cfg!(target_os = "linux") {
+        // A sticky, world-writable directory that survives a reboot.
+        PathBuf::from("/var/tmp")
+    } else if cfg!(target_os = "macos") {
         PathBuf::from("/Users/Shared")
     } else {
         std::env::var_os("PUBLIC")

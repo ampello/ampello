@@ -4,12 +4,12 @@
 
 # Ampello
 
-**A privacy-first text expander for Windows and macOS**
+**A privacy-first text expander for Windows, macOS and Linux**
 
 [![License](https://img.shields.io/badge/license-GPLv3-6135e8.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/ampello/ampello?color=6135e8)](https://github.com/ampello/ampello/releases)
 [![CI](https://github.com/ampello/ampello/actions/workflows/ci.yml/badge.svg)](https://github.com/ampello/ampello/actions/workflows/ci.yml)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-6135e8.svg)](#requirements)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-6135e8.svg)](#requirements)
 
 [Installation](#installation) · [Features](#features) · [Documentation](docs/ARCHITECTURE.md) · [Contributing](CONTRIBUTING.md)
 
@@ -19,7 +19,7 @@
 
 ## Overview
 
-Ampello is a text expander for Windows and macOS. It monitors keyboard input
+Ampello is a text expander for Windows, macOS and Linux. It monitors keyboard input
 system-wide, detects user-defined abbreviations, and substitutes them with
 their associated content. Expansion is available in any application that
 accepts keyboard input, including browsers, editors, terminals, email clients
@@ -87,6 +87,8 @@ executables are published alongside the installers.
 > download against the published `SHA256SUMS`, or build from source.
 
 ### Requirements
+
+**Linux (X11).** Install the `.deb` or run the `.AppImage`, and install `xclip` for clipboard features. Wayland sessions cannot be supported, because Wayland forbids watching another application's keystrokes; log in with an X11 session instead.
 
 **macOS 10.15 or later.** On first launch, grant Ampello Accessibility and Input Monitoring in System Settings > Privacy & Security; expansion begins as soon as you do. The app is unsigned, so right-click it and choose Open the first time.
 
