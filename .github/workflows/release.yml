@@ -72,13 +72,13 @@ jobs:
             Select-Object -First 1
           if (-not $setup) { throw "no installer was produced" }
 
-          $name = "Ampello_${version}_${{ matrix.arch }}-setup.exe"
+          $name = "Ampello-Setup-${version}-${{ matrix.arch }}.exe"
           Copy-Item $setup.FullName (Join-Path $out $name)
 
           # A portable copy for anyone who would rather not run an installer.
           $exe = "src-tauri/target/${{ matrix.target }}/release/ampello.exe"
           if (Test-Path $exe) {
-            Copy-Item $exe (Join-Path $out "Ampello_${version}_${{ matrix.arch }}-portable.exe")
+            Copy-Item $exe (Join-Path $out "Ampello-${version}-${{ matrix.arch }}-portable.exe")
           }
 
           # Checksums, because the binaries are unsigned and SmartScreen will
@@ -142,7 +142,7 @@ jobs:
           mkdir -p artifacts
           dmg=$(find "src-tauri/target/${{ matrix.target }}/release/bundle/dmg" -name '*.dmg' | head -n 1)
           [ -n "$dmg" ] || { echo "no disk image was produced"; exit 1; }
-          name="Ampello_${version}_${{ matrix.arch }}-mac.dmg"
+          name="Ampello-${version}-${{ matrix.arch }}.dmg"
           cp "$dmg" "artifacts/$name"
           (cd artifacts && shasum -a 256 "$name" | sed 's/ \*/  /' > "SHA256SUMS-mac-${{ matrix.arch }}.txt")
           ls artifacts
@@ -192,8 +192,8 @@ jobs:
           deb=$(find "$bundle/deb" -name '*.deb' | head -n 1)
           image=$(find "$bundle/appimage" -name '*.AppImage' | head -n 1)
           [ -n "$deb" ] && [ -n "$image" ] || { echo "a package was not produced"; exit 1; }
-          cp "$deb" "artifacts/Ampello_${version}_amd64.deb"
-          cp "$image" "artifacts/Ampello_${version}_x64.AppImage"
+          cp "$deb" "artifacts/ampello_${version}_amd64.deb"
+          cp "$image" "artifacts/Ampello-${version}-x86_64.AppImage"
           (cd artifacts && sha256sum *.deb *.AppImage > SHA256SUMS-linux-x64.txt)
           ls artifacts
 
@@ -231,7 +231,7 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
           draft: true
-          generate_release_notes: true
+          generate_release_notes: false
           files: dist/*
           body: |
             ### Install
@@ -239,11 +239,11 @@ jobs:
             Download the installer for your architecture and run it. It will ask
             whether to install for you only or for everyone on the machine.
 
-            * **x64**: `Ampello_*_x64-setup.exe`
-            * **ARM64**: `Ampello_*_arm64-setup.exe`
-            * **macOS (Apple Silicon)**: `Ampello_*_arm64-mac.dmg`
-            * **macOS (Intel)**: `Ampello_*_x64-mac.dmg`
-            * **Linux (x64)**: `Ampello_*_amd64.deb` or `Ampello_*_x64.AppImage`
+            * **x64**: `Ampello-Setup-<version>-x64.exe`
+            * **ARM64**: `Ampello-Setup-<version>-arm64.exe`
+            * **macOS (Apple Silicon)**: `Ampello-<version>-arm64.dmg`
+            * **macOS (Intel)**: `Ampello-<version>-x64.dmg`
+            * **Linux (x64)**: `ampello_<version>_amd64.deb` or `Ampello-<version>-x86_64.AppImage`
 
             On Linux, log in with an X11 session (Wayland does not allow global
             keystroke watching) and install `xclip` for clipboard features.
