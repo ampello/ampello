@@ -4,7 +4,12 @@ members = ["crates/ampello-core"]
 [package]
 name = "ampello"
 version = "0.3.0"
-description = "Ampello - universal text expansion"
+description = "Free, open-source, privacy-first text expander for Windows, macOS and Linux"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/ampello/ampello"
+homepage = "https://github.com/ampello/ampello"
+keywords = ["text-expander", "snippets", "productivity", "tauri", "privacy"]
+categories = ["text-processing", "gui"]
 authors = ["Yohann Joachim"]
 edition = "2021"
 rust-version = "1.77"
