@@ -3,7 +3,31 @@
   "private": true,
   "version": "0.3.0",
   "type": "module",
-  "description": "Ampello - universal text expansion",
+  "description": "Free, open-source, privacy-first text expander for Windows, macOS and Linux",
+  "keywords": [
+    "text-expander",
+    "snippets",
+    "snippet-manager",
+    "productivity",
+    "autotext",
+    "keyboard",
+    "tauri",
+    "privacy",
+    "offline",
+    "windows",
+    "macos",
+    "linux"
+  ],
+  "homepage": "https://github.com/ampello/ampello#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ampello/ampello.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ampello/ampello/issues"
+  },
+  "license": "GPL-3.0-or-later",
+  "author": "Yohann Joachim Zapata",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

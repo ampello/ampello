@@ -4,22 +4,31 @@
 
 # Ampello
 
-**A privacy-first text expander for Windows, macOS and Linux**
+**A free, open-source, privacy-first text expander for Windows, macOS and Linux**
+
+Type a short trigger like `:email` anywhere, and Ampello replaces it with your full snippet: text, signatures, templates, even file attachments. Fully offline, no account.
 
 [![License](https://img.shields.io/badge/license-GPLv3-6135e8.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/ampello/ampello?color=6135e8)](https://github.com/ampello/ampello/releases)
+[![Release](https://img.shields.io/github/v/release/ampello/ampello?color=6135e8)](https://github.com/ampello/ampello/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/ampello/ampello/total?color=6135e8)](https://github.com/ampello/ampello/releases)
 [![CI](https://github.com/ampello/ampello/actions/workflows/ci.yml/badge.svg)](https://github.com/ampello/ampello/actions/workflows/ci.yml)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-6135e8.svg)](#requirements)
+[![Stars](https://img.shields.io/github/stars/ampello/ampello?style=flat&color=6135e8)](https://github.com/ampello/ampello/stargazers)
 
-[Installation](#installation) · [Features](#features) · [Documentation](docs/ARCHITECTURE.md) · [Contributing](CONTRIBUTING.md)
+[**Download**](https://github.com/ampello/ampello/releases/latest) · [Features](#features) · [Documentation](docs/ARCHITECTURE.md) · [Contributing](CONTRIBUTING.md)
 
 </div>
+
+> If you find Ampello useful, consider giving it a ⭐ on GitHub. It helps other people find it.
 
 ---
 
 ## Overview
 
-Ampello is a text expander for Windows, macOS and Linux. It monitors keyboard input
+Ampello is a text expander (also called a snippet manager or keyboard
+shortcut tool) for Windows, macOS and Linux, and a lightweight, local-only
+alternative to tools such as TextExpander, espanso, PhraseExpress and
+AutoHotkey hotstrings. It monitors keyboard input
 system-wide, detects user-defined abbreviations, and substitutes them with
 their associated content. Expansion is available in any application that
 accepts keyboard input, including browsers, editors, terminals, email clients
@@ -68,15 +77,19 @@ Trigger      Expansion
 
 ## Installation
 
-Download the installer for your architecture from the
-[releases page](https://github.com/ampello/ampello/releases).
+Download the file for your system from the
+[latest release](https://github.com/ampello/ampello/releases/latest).
 
-| Architecture | File |
+| System | File |
 | --- | --- |
-| x64 | `Ampello_<version>_x64-setup.exe` |
-| ARM64 | `Ampello_<version>_arm64-setup.exe` |
+| Windows x64 | `Ampello-Setup-<version>-x64.exe` (or `-x64-portable.exe`) |
+| Windows ARM64 | `Ampello-Setup-<version>-arm64.exe` (or `-arm64-portable.exe`) |
+| macOS Intel | `Ampello-<version>-x64.dmg` |
+| macOS Apple Silicon | `Ampello-<version>-arm64.dmg` |
+| Linux (Debian, Ubuntu) | `ampello_<version>_amd64.deb` |
+| Linux (other) | `Ampello-<version>-x86_64.AppImage` |
 
-The installer offers two installation scopes. A per-user installation requires
+On Windows, the installer offers two installation scopes. A per-user installation requires
 no elevated privileges. A machine-wide installation requires administrator
 rights and makes the application available to every account. Portable
 executables are published alongside the installers.
