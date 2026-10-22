@@ -119,7 +119,7 @@ export function Menu({ label, items, className }: MenuProps) {
                       item.onSelect();
                     }}
                     className={cn(
-                      "flex h-[27px] w-full items-center rounded-[5px] px-2 text-left",
+                      "flex h-[27px] w-full items-center rounded-[4px] px-2 text-left",
                       "text-[12.5px] transition-colors duration-75",
                       "disabled:pointer-events-none disabled:opacity-45",
                       item.danger

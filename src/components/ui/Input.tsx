@@ -17,12 +17,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       ref={ref}
       aria-invalid={invalid || undefined}
       className={cn(
-        "h-9 w-full rounded-[8px] border bg-surface px-3 text-[13px] text-primary",
-        "placeholder:text-muted transition-[border-color,box-shadow] duration-150",
-        "ease-[var(--ease-out)] focus:outline-none focus-visible:outline-none",
+        "h-8 w-full rounded-[4px] border bg-surface px-3 text-[14px] text-primary",
+        "placeholder:text-secondary transition-colors duration-100",
+        "hover:bg-surface-2 focus:bg-bg focus:outline-none focus-visible:outline-none",
+        // Windows draws focus as a thicker accent line along the bottom edge.
         invalid
-          ? "border-danger focus:border-danger focus:shadow-[0_0_0_3px_var(--danger-soft)]"
-          : "border-border focus:border-accent focus:shadow-[0_0_0_3px_var(--accent-ring)]",
+          ? "border-danger border-b-2"
+          : "border-border border-b-border-strong focus:border-b-2 focus:border-b-accent",
         mono && "font-mono",
         className,
       )}

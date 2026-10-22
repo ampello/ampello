@@ -2,7 +2,32 @@
 import { modKey } from "@/lib/platform";
 import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { Monitor, Moon, Sun, TriangleAlert } from "lucide-react";
+import {
+  AppWindow,
+  Clipboard,
+  ClipboardCheck,
+  ClipboardPaste,
+  ClipboardType,
+  Command,
+  CornerDownLeft,
+  Database,
+  Download,
+  FolderOpen,
+  Gauge,
+  Keyboard,
+  Monitor,
+  Moon,
+  OctagonX,
+  Palette,
+  Power,
+  RefreshCw,
+  Sun,
+  TextCursorInput,
+  Timer,
+  TriangleAlert,
+  Upload,
+  Zap,
+} from "lucide-react";
 import { TopBar } from "@/components/layout/TopBar";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { SettingsBlock, SettingsRow, SettingsSection } from "@/components/ui/SettingsSection";
@@ -27,6 +52,7 @@ import type {
   ImportReport,
   InjectionMode,
   TypingSpeed,
+  UpdateInfo,
 } from "@/lib/types";
 
 const APPEARANCE_OPTIONS = [
@@ -192,9 +218,9 @@ export function SettingsView() {
     <>
       <TopBar title="Settings" />
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-[840px] px-8 py-9">
+        <div className="w-full max-w-[1000px] px-8 pb-10 pt-2">
           {error ? (
-            <div className="mb-7 overflow-hidden rounded-[12px] border border-border">
+            <div className="mb-7">
               <Notice tone="danger">{error}</Notice>
             </div>
           ) : null}
@@ -202,6 +228,8 @@ export function SettingsView() {
           <SettingsSection title="General">
             <SettingsRow
               label="Theme"
+              icon={Palette}
+              description="Light, dark, or follow Windows"
               hint="Light, dark, or follow the system theme and change with it."
               control={
                 <SegmentedControl<Appearance>
@@ -215,6 +243,8 @@ export function SettingsView() {
 
             <SettingsRow
               label="Launch at startup"
+              icon={Power}
+              description="Start Ampello in the tray when you sign in"
               hint="Registers Ampello with the system so it starts when you sign in. A startup launch goes straight to the notification area without opening a window."
               control={
                 <Switch
@@ -227,6 +257,8 @@ export function SettingsView() {
 
             <SettingsRow
               label="Close to the tray"
+              icon={AppWindow}
+              description="Keep expanding snippets after the window is closed"
               hint="What the window’s close button does. On, closing the window leaves Ampello running in the notification area and snippets keep expanding. Off, closing the window quits Ampello entirely and expansion stops until you start it again."
               control={
                 <Switch
@@ -249,6 +281,8 @@ export function SettingsView() {
 
             <SettingsRow
               label="Expand snippets"
+              icon={Zap}
+              description="Replace triggers with their snippets in every app"
               hint="Turns Ampello's system-wide expansion on and off. When it is off Ampello keeps running and your snippets are untouched, but nothing is watched for and nothing is replaced. The same switch appears in the notification-area menu."
               control={
                 <Switch
@@ -267,6 +301,8 @@ export function SettingsView() {
 
             <SettingsRow
               label="Trigger position"
+              icon={TextCursorInput}
+              description="Where in a word a trigger is allowed to start"
               hint="How much of a word a trigger is allowed to interrupt. Word start requires the trigger to begin a new word, so typing “something:sig” is left alone and only “:sig” after a space or punctuation expands. Anywhere removes that protection and lets a trigger fire in the middle of a word."
               control={
                 <SegmentedControl<BoundaryMode>
@@ -280,6 +316,8 @@ export function SettingsView() {
 
             <SettingsRow
               label="Keep the ending character"
+              icon={CornerDownLeft}
+              description="Send the space, full stop or Enter that finished the trigger"
               hint="Whether the key that completed the trigger is sent again after the snippet. A trigger only fires once you finish it with a space, a full stop, Tab or Enter, and Ampello swallows that key while it works. With this on it is sent afterwards, so “:email.” keeps its full stop and “:email” followed by Enter still sends the message."
               control={
                 <Switch
@@ -294,6 +332,8 @@ export function SettingsView() {
           <SettingsSection title="Insertion">
             <SettingsRow
               label="Insertion method"
+              icon={ClipboardPaste}
+              description="Paste is instant and exact; Type is for apps that refuse a paste"
               hint="How a snippet reaches the application you are typing in. Paste uses the clipboard: instant and exact, and your clipboard is put back afterwards. Use it unless an application refuses Ctrl+V. Type always sends keystrokes and never touches the clipboard, for applications that refuse a paste; it is slower, and an application that ignores character-level tabs will lose the indentation. A long insertion can be stopped part-way with the cancel key (Esc unless you change it below)."
               control={
                 <SegmentedControl<InjectionMode>
@@ -307,6 +347,8 @@ export function SettingsView() {
 
             <SettingsRow
               label="Typing speed"
+              icon={Gauge}
+              description="How fast snippets are typed when using Type"
               hint="How fast a snippet is typed, when Ampello types it rather than pasting it. It goes in one character at a time, the way you would type it yourself: Fast is around 250 characters a second, Balanced around 150, and Careful around 60, which is about as quick as a fast typist. Slower is not only calmer to watch, it is more reliable. An application that cannot keep up queues the surplus somewhere Ampello can no longer reach, which is what makes a long insertion carry on typing after you have pressed the cancel key. Pasting is unaffected."
               control={
                 <SegmentedControl<TypingSpeed>
@@ -320,13 +362,15 @@ export function SettingsView() {
 
             <SettingsRow
               label="Cancel key"
+              icon={OctagonX}
+              description="Stops a long insertion part-way through"
               hint="The key that stops a long insertion part-way through. Escape by default, but applications use Escape too - a browser stops loading a page or leaves full screen on it - so pick a key you never press for anything else if that gets in the way. Only keys that are not text are offered. It applies to typed insertions; a paste lands all at once."
               control={
                 <select
                   aria-label="Cancel key"
                   value={settings.cancelKey}
                   onChange={(event) => apply({ cancelKey: event.target.value })}
-                  className="h-8 rounded-[8px] border border-border bg-surface px-2 text-[13px] text-primary focus:border-accent focus:outline-none"
+                  className="h-8 min-w-[120px] rounded-[4px] border border-border border-b-border-strong bg-surface px-2.5 text-[14px] text-primary hover:bg-surface-2 focus:outline-none focus-visible:border-b-2 focus-visible:border-b-accent"
                 >
                   {CANCEL_KEY_OPTIONS.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -339,7 +383,9 @@ export function SettingsView() {
 
             <SettingsRow
               label="Restore the clipboard"
-              hint="Pasting a snippet means putting it on the clipboard first, which would otherwise destroy whatever you had copied. With this on, Ampello reads the clipboard out beforehand (text, images, copied files) and writes it back once the paste has landed. If it finds something it cannot copy faithfully, it types the snippet instead rather than overwrite it."
+              icon={ClipboardCheck}
+              description="Put back what you had copied after a snippet is pasted"
+              hint="Pasting a snippet means putting it on the clipboard first, which would otherwise destroy whatever you had copied. With this on, Ampello reads the clipboard out beforehand (text, images, copied files) and writes it back once the paste has landed. Anything it cannot copy faithfully is lost, but the snippet is still pasted."
               control={
                 <Switch
                   label="Restore the clipboard"
@@ -351,6 +397,8 @@ export function SettingsView() {
 
             <SettingsRow
               label="Attachment delay"
+              icon={Timer}
+              description="How long to wait after pasting files before sending text"
               hint="How long Ampello waits after handing files to an application before sending it anything else. There is no way to ask an application whether it has finished taking an attachment - it reads the clipboard in its own time, and a chat box may start an upload before it will accept anything more - so this is a guess, and the right value depends on the application and the machine. Too short and the message text arrives before the files; too long and every snippet with a file feels slow."
               control={
                 <div className="flex items-center gap-2">
@@ -370,7 +418,7 @@ export function SettingsView() {
                         ),
                       });
                     }}
-                    className="h-8 w-[86px] rounded-[8px] border border-border bg-surface px-2 text-right text-[13px] tabular-nums text-primary focus:border-accent focus:outline-none"
+                    className="h-8 w-[90px] rounded-[4px] border border-border border-b-border-strong bg-surface px-2.5 text-right text-[14px] tabular-nums text-primary hover:bg-surface-2 focus:outline-none focus:border-b-2 focus:border-b-accent"
                     aria-label="Attachment delay in milliseconds"
                   />
                   <span className="text-[12.5px] text-muted">ms</span>
@@ -382,6 +430,8 @@ export function SettingsView() {
           <SettingsSection title="Shortcuts">
             <SettingsRow
               label="Global shortcut"
+              icon={Keyboard}
+              description="Show or hide Ampello from any app"
               hint="A key combination that brings Ampello forward from any application, and puts it away again if it is already in front. If another application has already claimed the combination Ampello will say so rather than failing quietly."
               control={
                 <ShortcutRecorder
@@ -400,6 +450,8 @@ export function SettingsView() {
 
             <SettingsRow
               label="Clipboard shortcut"
+              icon={Clipboard}
+              description="Insert your clipboard with a second shortcut"
               hint="A second key combination that inserts whatever is on your clipboard, alongside the usual Ctrl+V rather than replacing it. Switch it off and the combination goes straight back to the application you are working in. It is also released while snippet expansion is paused, because pausing Ampello pauses all of it."
               control={
                 <Switch
@@ -414,6 +466,8 @@ export function SettingsView() {
 
             <SettingsRow
               label="Clipboard combination"
+              icon={Command}
+              description="The keys that insert the clipboard"
               hint="The combination that inserts the clipboard. Ctrl Shift V by default, which few applications use for anything you would miss. It cannot be the same as the global shortcut, and if another application has already claimed it Ampello will say so rather than failing quietly."
               control={
                 <ShortcutRecorder
@@ -425,6 +479,8 @@ export function SettingsView() {
 
             <SettingsRow
               label="Clipboard method"
+              icon={ClipboardType}
+              description="Type the clipboard out, or send a plain paste"
               hint="What the combination does. Type sends the clipboard as individual keystrokes at the typing speed set above, which is how text gets into an application that refuses a paste or reformats one; a long clipboard takes a while, and the cancel key stops it part-way. Paste sends a plain Ctrl+V, which is instant and exact. If the clipboard holds an image or a list of files there is nothing to type, so Ampello pastes either way."
               control={
                 <SegmentedControl<ClipboardMode>
@@ -465,6 +521,8 @@ export function SettingsView() {
 
             <SettingsRow
               label="Library"
+              icon={Database}
+              description="Stored in one file on this machine, never uploaded"
               hint="How much Ampello is storing, and how large the database file has become. Everything lives in a single SQLite file on this machine and is never uploaded."
               control={
                 <span className="text-[12.5px] tabular-nums text-secondary">
@@ -485,6 +543,8 @@ export function SettingsView() {
 
             <SettingsRow
               label="Location"
+              icon={FolderOpen}
+              description="Personal, or a folder shared with other accounts"
               hint="Where this account keeps its snippets. A personal library is private to your user account. A shared folder lets everyone who points at it use the same snippets and attachments - useful on a family or office machine. Sharing is never automatic: each account has to choose the folder itself. Keep it on a local disk; a network share will not work reliably."
               control={
                 <div className="flex items-center gap-2">
@@ -513,6 +573,8 @@ export function SettingsView() {
 
             <SettingsRow
               label="Export"
+              icon={Download}
+              description="Save your whole library to one file"
               hint="Writes your whole library to one file: every trigger, title and body, which collection each belongs to, and whether it is enabled or a favourite. Content is stored byte for byte. YAML is readable and safe to edit by hand; JSON is there for other tools."
               control={
                 <div className="flex items-center gap-2">
@@ -528,6 +590,8 @@ export function SettingsView() {
 
             <SettingsRow
               label="Import"
+              icon={Upload}
+              description="Add snippets from a backup without overwriting yours"
               hint="Reads a Ampello backup and adds it to your library. Nothing you already have is touched: a snippet whose trigger you are already using is skipped and reported, so importing can never overwrite your own work."
               control={
                 <Button size="sm" disabled={busy !== null} onClick={runImport}>
@@ -566,10 +630,7 @@ export function SettingsView() {
           </SettingsSection>
 
           <SettingsSection title="About">
-            <SettingsRow
-              label="Version"
-              control={<span className="text-[12.5px] tabular-nums text-secondary">0.1.0</span>}
-            />
+            <UpdateCard />
           </SettingsSection>
         </div>
       </main>
@@ -587,12 +648,12 @@ function Notice({
   return (
     <div
       className={cn(
-        "flex items-start gap-2 px-4 py-3",
+        "flex items-start gap-3 rounded-[8px] border border-card-border px-4 py-3",
         tone === "danger" ? "bg-danger-soft text-danger" : "bg-warning-soft text-warning",
       )}
     >
-      <TriangleAlert size={15} strokeWidth={1.75} className="mt-px shrink-0" />
-      <div className="min-w-0 text-[12.5px] leading-relaxed">{children}</div>
+      <TriangleAlert size={16} strokeWidth={1.75} className="mt-px shrink-0" />
+      <div className="min-w-0 text-[13px] leading-relaxed">{children}</div>
     </div>
   );
 }
@@ -657,7 +718,7 @@ function EngineBanner({
   return (
     <div
       className={cn(
-        "-mx-4 -my-3.5 px-4 py-3.5",
+        "-mx-4 -my-3.5 px-4 py-4",
         broken ? "bg-danger-soft" : "bg-surface-2",
       )}
     >
@@ -703,4 +764,59 @@ function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function UpdateCard() {
+  const [version, setVersion] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [result, setResult] = useState<UpdateInfo | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+
+  useEffect(() => {
+    ipc.appVersion().then(setVersion).catch(() => setVersion(null));
+  }, []);
+
+  const check = () => {
+    setChecking(true);
+    setProblem(null);
+    ipc
+      .checkForUpdate()
+      .then(setResult)
+      .catch((error: unknown) =>
+        setProblem(error instanceof Error ? error.message : String(error)),
+      )
+      .finally(() => setChecking(false));
+  };
+
+  const status = problem
+    ? problem
+    : result
+      ? result.available
+        ? `Version ${result.latest} is available.`
+        : "You have the latest version."
+      : "Checks GitHub only when you ask. Nothing about your snippets is sent.";
+
+  return (
+    <SettingsRow
+      icon={RefreshCw}
+      label={version ? `Ampello ${version}` : "Ampello"}
+      description={status}
+      control={
+        result?.available ? (
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => void ipc.openDownloadPage().catch(reportError)}
+          >
+            <Download size={14} strokeWidth={1.75} />
+            Download {result.latest}
+          </Button>
+        ) : (
+          <Button size="sm" disabled={checking} onClick={check}>
+            {checking ? "Checking…" : "Check for updates"}
+          </Button>
+        )
+      }
+    />
+  );
 }
