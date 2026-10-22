@@ -42,7 +42,7 @@ impl Default for Settings {
             boundary_mode: "word".into(),
             preserve_boundary_char: true,
             restore_clipboard: true,
-            injection_mode: "auto".into(),
+            injection_mode: "paste".into(),
             typing_speed: "balanced".into(),
             cancel_key: "Escape".into(),
             clipboard_shortcut_enabled: true,
@@ -128,7 +128,11 @@ pub fn load(conn: &Connection) -> Result<Settings> {
             .unwrap_or(defaults.preserve_boundary_char),
         restore_clipboard: read_bool(conn, RESTORE_CLIPBOARD)?
             .unwrap_or(defaults.restore_clipboard),
-        injection_mode: read_str(conn, INJECTION_MODE)?.unwrap_or(defaults.injection_mode),
+        // "auto" was retired; a library that still holds it loads as paste.
+        injection_mode: match read_str(conn, INJECTION_MODE)?.as_deref() {
+            Some("type") => "type".into(),
+            _ => defaults.injection_mode,
+        },
         typing_speed: read_str(conn, TYPING_SPEED)?.unwrap_or(defaults.typing_speed),
         cancel_key: read_str(conn, CANCEL_KEY)?
             .filter(|value| crate::cancel::CancelKey::parse(value).is_some())
@@ -178,10 +182,8 @@ pub fn apply(conn: &Connection, patch: SettingsPatch) -> Result<Settings> {
         write_bool(conn, RESTORE_CLIPBOARD, value)?;
     }
     if let Some(value) = patch.injection_mode.as_deref() {
-        if !matches!(value, "auto" | "paste" | "type") {
-            return Err(Error::invalid(
-                "Injection mode must be auto, paste or type.",
-            ));
+        if !matches!(value, "paste" | "type") {
+            return Err(Error::invalid("Injection mode must be paste or type."));
         }
         write_str(conn, INJECTION_MODE, value)?;
     }

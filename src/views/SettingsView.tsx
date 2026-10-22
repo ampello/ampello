@@ -41,7 +41,6 @@ const BOUNDARY_OPTIONS = [
 ];
 
 const INJECTION_OPTIONS = [
-  { value: "auto" as const, label: "Auto" },
   { value: "paste" as const, label: "Paste" },
   { value: "type" as const, label: "Type" },
 ];
@@ -295,7 +294,7 @@ export function SettingsView() {
           <SettingsSection title="Insertion">
             <SettingsRow
               label="Insertion method"
-              hint="How a snippet reaches the application you are typing in. Auto sends short single-line snippets as keystrokes and uses the clipboard for anything longer, multi-line or indented. Leave this selected unless something is wrong. Paste always uses the clipboard: instant and exact, but the application has to accept Ctrl+V. Type always sends keystrokes and never touches the clipboard, for applications that refuse a paste; it is slower, and an application that ignores character-level tabs will lose the indentation. A long insertion can be stopped part-way with the cancel key (Esc unless you change it below)."
+              hint="How a snippet reaches the application you are typing in. Paste uses the clipboard: instant and exact, and your clipboard is put back afterwards. Use it unless an application refuses Ctrl+V. Type always sends keystrokes and never touches the clipboard, for applications that refuse a paste; it is slower, and an application that ignores character-level tabs will lose the indentation. A long insertion can be stopped part-way with the cancel key (Esc unless you change it below)."
               control={
                 <SegmentedControl<InjectionMode>
                   label="Insertion method"

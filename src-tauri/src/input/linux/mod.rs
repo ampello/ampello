@@ -58,8 +58,6 @@ const SYM_CONTROL_L: u32 = 0xffe3;
 const SYM_CONTROL_R: u32 = 0xffe4;
 const SYM_V: u32 = 0x76;
 
-const TYPEABLE_LIMIT: usize = 5_000;
-const AUTO_TYPE_LIMIT: usize = 24;
 const CANCELLED: &str = "cancelled";
 
 const WAYLAND_HELP: &str = "This is a Wayland session, and Wayland does not let one application \
@@ -912,16 +910,8 @@ impl Drop for Injector {
 
 // --- Delivering a payload --------------------------------------------------
 
-fn wants_paste(content: &str, config: Config) -> bool {
-    match config.injection {
-        InjectionMode::Paste => true,
-        InjectionMode::Type => false,
-        InjectionMode::Auto => {
-            content.chars().count() > AUTO_TYPE_LIMIT
-                || content.contains('\n')
-                || content.contains('\t')
-        }
-    }
+fn wants_paste(config: Config) -> bool {
+    config.injection == InjectionMode::Paste
 }
 
 fn text_settle(content: &str) -> u64 {
@@ -940,7 +930,7 @@ fn place_text(
     if content.is_empty() {
         return Ok(());
     }
-    if !wants_paste(content, config) {
+    if !wants_paste(config) {
         return injector.type_text(content);
     }
     injector.check()?;
@@ -989,7 +979,7 @@ fn deliver_payload(
     strict_order: bool,
     config: Config,
 ) -> Result<(), String> {
-    let needs_clipboard = !files.is_empty() || wants_paste(content, config);
+    let needs_clipboard = !files.is_empty() || wants_paste(config);
     if !needs_clipboard {
         return injector.type_text(content);
     }
@@ -1006,12 +996,10 @@ fn deliver_payload(
         None
     };
 
-    if files.is_empty() {
-        if let Some(snapshot) = &snapshot {
-            if !snapshot.complete() && content.chars().count() <= TYPEABLE_LIMIT {
-                log::info!("clipboard holds content Ampello cannot restore; typing instead");
-                return injector.type_text(content);
-            }
+    // Paste was chosen, so paste; restore whatever of the clipboard we can.
+    if let Some(snapshot) = &snapshot {
+        if !snapshot.complete() {
+            log::info!("clipboard holds content Ampello cannot fully restore; pasting anyway");
         }
     }
 

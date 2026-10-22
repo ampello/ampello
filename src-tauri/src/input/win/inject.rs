@@ -25,10 +25,6 @@ use super::TypingSpeed;
 // Without this, injected backspaces and pastes feed back into the matcher.
 pub const AMPELLO_MARKER: usize = 0x414D_504C;
 
-const TYPEABLE_LIMIT: usize = 5_000;
-
-const AUTO_TYPE_LIMIT: usize = 24;
-
 const BATCH: usize = 64;
 
 // How far ahead of Windows we are willing to get, in events.
@@ -464,18 +460,8 @@ fn paste_shortcut(guard: &Guard) -> Result<(), String> {
     ])
 }
 
-fn wants_paste(content: &str, config: Config) -> bool {
-    match config.injection {
-        InjectionMode::Paste => true,
-
-        InjectionMode::Type => false,
-
-        InjectionMode::Auto => {
-            content.chars().count() > AUTO_TYPE_LIMIT
-                || content.contains('\n')
-                || content.contains('\t')
-        }
-    }
+fn wants_paste(config: Config) -> bool {
+    config.injection == InjectionMode::Paste
 }
 
 fn text_settle(content: &str) -> u64 {
@@ -491,10 +477,7 @@ pub fn deliver(content: &str, config: Config, guard: &Guard) -> Result<(), Strin
         return Ok(());
     }
 
-    let length = content.chars().count();
-    let wants_paste = wants_paste(content, config);
-
-    if !wants_paste {
+    if !wants_paste(config) {
         return type_text(content, guard);
     }
 
@@ -510,10 +493,12 @@ pub fn deliver(content: &str, config: Config, guard: &Guard) -> Result<(), Strin
         None
     };
 
+    // Paste was chosen, so paste. Most clipboards hold some format that cannot
+    // be copied back; typing instead would ignore the user's choice, so restore
+    // what we can and carry on.
     if let Some(snapshot) = &snapshot {
-        if !snapshot.complete && length <= TYPEABLE_LIMIT {
-            log::info!("clipboard holds content Ampello cannot restore; typing instead of pasting");
-            return type_text(content, guard);
+        if !snapshot.complete {
+            log::info!("clipboard holds content Ampello cannot fully restore; pasting anyway");
         }
     }
 
@@ -609,7 +594,7 @@ fn place_text(content: &str, config: Config, guard: &Guard) -> Result<(), String
     if content.is_empty() {
         return Ok(());
     }
-    if !wants_paste(content, config) {
+    if !wants_paste(config) {
         return type_text(content, guard);
     }
 
