@@ -21,6 +21,10 @@ Type a short trigger like `:email` anywhere, and Ampello replaces it with your f
 
 > If you find Ampello useful, consider giving it a ⭐ on GitHub. It helps other people find it.
 
+<p align="center">
+  <img src="docs/images/snippets-light.png" alt="Ampello snippet library and editor" width="860">
+</p>
+
 ---
 
 ## Overview
@@ -75,6 +79,14 @@ Trigger      Expansion
   common snippet directory. Libraries are private to each account by default.
 * **Portable backups.** Exports are plain YAML, suitable for version control
   and manual editing.
+
+## Screenshots
+
+| Home | Settings |
+| --- | --- |
+| ![Home dashboard with most used and recently edited snippets](docs/images/home-light.png) | ![Settings page with cards for each option](docs/images/settings-light.png) |
+| **Dark mode** | **Attachments** |
+| ![Settings in dark mode](docs/images/settings-dark.png) | ![A snippet with file attachments, in dark mode](docs/images/snippets-dark.png) |
 
 ## Installation
 
