@@ -27,13 +27,11 @@ sends the message.
 **Word boundaries by default.** `hello :sig` expands, `something:sig` does not.
 Settings → Expansion → Trigger position → Anywhere removes that protection.
 
-**Two ways in.** Short single-line snippets are typed as individual keystrokes
-and never touch the clipboard. Longer, multi-line or indented ones are pasted,
-which means borrowing the clipboard: Ampello copies out every clipboard format
+**Two ways in.** Paste, the default, borrows the clipboard: Ampello copies out every clipboard format
 backed by global memory first (text, HTML, RTF, DIB images, copied file lists)
-and puts them back afterwards. If it finds a format it *cannot* copy, and the
-snippet is short enough to type, it types instead rather than destroying
-something it could not restore. You can force either route in Settings.
+and puts them back afterwards. A format it cannot copy is lost, but the paste
+still happens: Paste always pastes. Type sends keystrokes instead and never
+touches the clipboard. Choose between them in Settings.
 
 **Tabs and newlines need opposite treatment.** A newline is sent as a real
 Return key. Sent as a Unicode carriage return it is ignored by anything built
@@ -41,8 +39,8 @@ on a web view, and the snippet arrives as one long line. A tab is sent as a
 Unicode character and never as the Tab key, because Tab moves focus to the
 next control instead of indenting, which is how a snippet of indented code
 ends up typing itself into a toolbar. The cost is that an application ignoring
-character-level tabs will drop the indentation. Auto sidesteps the question by
-pasting anything indented; **Type never touches the clipboard at all**,
+character-level tabs will drop the indentation. Paste sidesteps the question;
+**Type never touches the clipboard at all**,
 because that is the one thing it exists for.
 
 **A snippet can carry files.** Any files - an image, a PDF, a .docx, an

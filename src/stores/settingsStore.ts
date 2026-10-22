@@ -13,7 +13,7 @@ export const DEFAULT_SETTINGS: Settings = {
   boundaryMode: "word",
   preserveBoundaryChar: true,
   restoreClipboard: true,
-  injectionMode: "auto",
+  injectionMode: "paste",
   typingSpeed: "balanced",
   cancelKey: "Escape",
   clipboardShortcutEnabled: true,

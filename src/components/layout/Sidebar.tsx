@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-import { isMac, modKey } from "@/lib/platform";
+import { modKey } from "@/lib/platform";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { Folder, House, Layers, PanelLeft, Plus, Settings as SettingsIcon, Star } from "lucide-react";
+import { Folder, House, Layers, Plus, Settings as SettingsIcon, Star } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Button } from "@/components/ui/Button";
@@ -17,7 +17,6 @@ import type { Category } from "@/lib/types";
 
 export function Sidebar() {
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
-  const toggle = useUiStore((s) => s.toggleSidebar);
   const view = useUiStore((s) => s.view);
   const scope = useUiStore((s) => s.scope);
   const setScope = useUiStore((s) => s.setScope);
@@ -37,17 +36,6 @@ export function Sidebar() {
   const onSnippets = view === "snippets";
   const favoriteCount = snippets.filter((s) => s.favorite).length;
 
-  const toggleButton = (
-    <IconButton
-      label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-      size="sm"
-      onClick={toggle}
-      className="opacity-70 hover:opacity-100"
-    >
-      <PanelLeft size={15} strokeWidth={1.75} />
-    </IconButton>
-  );
-
   return (
     <nav
       aria-label="Primary"
@@ -55,24 +43,12 @@ export function Sidebar() {
         "flex h-full shrink-0 flex-col overflow-hidden bg-sidebar",
 
         "transition-[width] duration-[240ms] ease-[cubic-bezier(0.32,0.72,0,1)]",
-        collapsed ? "w-[56px]" : "w-[228px]",
+        collapsed ? "w-[52px]" : "w-[248px]",
       )}
     >
       <div
-        data-tauri-drag-region
         className={cn(
-          "flex h-12 shrink-0 items-center border-b border-border",
-          isMac ? (collapsed ? "justify-center px-0" : "justify-end pr-3") : collapsed ? "justify-center px-0" : "pl-3",
-        )}
-      >
-        {isMac && collapsed ? null : toggleButton}
-      </div>
-      {isMac && collapsed ? (
-        <div className="flex shrink-0 justify-center pt-2">{toggleButton}</div>
-      ) : null}
-      <div
-        className={cn(
-          "shrink-0 px-2.5 pt-3",
+          "shrink-0 px-1.5 pt-1",
         )}
       >
         <NavItem
@@ -85,11 +61,12 @@ export function Sidebar() {
       </div>
       <div
         className={cn(
-          "flex shrink-0 px-2.5 pb-4 pt-2",
+          "flex shrink-0 px-1.5 pb-3 pt-2",
           collapsed && "justify-center",
         )}
       >
         <Button
+          variant="primary"
           title={`New snippet (${modKey} N)`}
           aria-label={collapsed ? "New snippet" : undefined}
           onClick={() => openEditor(null)}
@@ -97,18 +74,18 @@ export function Sidebar() {
             "overflow-hidden",
 
             collapsed
-              ? "h-[30px] w-[36px] justify-center px-0"
-              : "h-[30px] w-full justify-start gap-2.5 px-2",
+              ? "h-9 w-10 justify-center px-0"
+              : "h-9 w-full justify-start gap-3 px-3",
           )}
         >
-          <Plus size={15} strokeWidth={2} className="shrink-0 text-accent" />
+          <Plus size={16} strokeWidth={2} className="shrink-0" />
           {collapsed ? null : <span className="truncate">New Snippet</span>}
         </Button>
       </div>
 
       <div
         className={cn(
-          "flex-1 overflow-y-auto overflow-x-hidden px-2.5 pb-3",
+          "flex-1 overflow-y-auto overflow-x-hidden px-1.5 pb-3",
         )}
       >
         <NavItem
@@ -130,12 +107,12 @@ export function Sidebar() {
 
         <div
           className={cn(
-            "mb-1.5 mt-6 flex items-center justify-between overflow-hidden pl-2 pr-0.5",
+            "mb-1 mt-5 flex items-center justify-between overflow-hidden pl-3 pr-1",
             "transition-opacity duration-150",
             collapsed && "pointer-events-none opacity-0",
           )}
         >
-          <p className="truncate text-[11px] font-medium uppercase tracking-[0.06em] text-muted">
+          <p className="truncate text-[12px] font-semibold text-secondary">
             Collections
           </p>
           <IconButton
@@ -206,7 +183,7 @@ export function Sidebar() {
 
       <div
         className={cn(
-          "shrink-0 overflow-hidden border-t border-border px-2.5 py-2.5",
+          "shrink-0 overflow-hidden px-1.5 py-2",
         )}
       >
         <NavItem
@@ -261,37 +238,38 @@ function NavItem({
   menu,
 }: NavItemProps) {
   return (
-    <div className="group relative">
+    <div className="group relative my-px">
       <button
         type="button"
         onClick={onClick}
         title={collapsed ? label : undefined}
         aria-current={active ? "page" : undefined}
         className={cn(
-          "flex h-[30px] w-full items-center overflow-hidden rounded-[8px]",
-          "text-[13px] font-medium transition-colors duration-150",
-          collapsed ? "justify-center px-0" : "gap-2.5 px-2",
+          "relative flex h-9 w-full items-center overflow-hidden rounded-[4px]",
+          "text-[14px] text-primary transition-colors duration-100",
+          collapsed ? "justify-center px-0" : "gap-3.5 px-3",
           active
-            ? "bg-accent-soft text-accent"
-            : "text-secondary hover:bg-surface-2 hover:text-primary",
+            ? "bg-accent-soft hover:bg-accent-soft-hover"
+            : "hover:bg-accent-soft active:bg-accent-soft-hover",
         )}
       >
-        <Icon
-          size={15}
-          strokeWidth={1.75}
+        {/* The Windows 11 selection pill. */}
+        <span
+          aria-hidden="true"
           className={cn(
-            "shrink-0",
-            active ? "text-accent" : "text-muted group-hover:text-secondary",
+            "absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-accent",
+            "transition-transform duration-150 ease-[var(--ease-out)]",
+            active ? "scale-y-100" : "scale-y-0",
           )}
         />
+        <Icon size={16} strokeWidth={1.75} className="shrink-0 text-primary" />
         {collapsed ? null : (
           <span className="min-w-0 flex-1 truncate text-left">{label}</span>
         )}
         {!collapsed && typeof count === "number" && count > 0 ? (
           <span
             className={cn(
-              "shrink-0 text-[11.5px] tabular-nums",
-              active ? "text-accent" : "text-muted",
+              "shrink-0 text-[12px] tabular-nums text-secondary",
               Boolean(menu) && "group-hover:invisible",
             )}
           >
@@ -343,7 +321,7 @@ function InlineNameInput({
           onCancel();
         }
       }}
-      className="h-[30px] w-full rounded-[8px] border border-accent bg-surface px-2 text-[13px] text-primary focus:outline-none"
+      className="h-9 w-full rounded-[4px] border border-border border-b-2 border-b-accent bg-surface px-3 text-[14px] text-primary focus:outline-none"
     />
   );
 }

@@ -14,105 +14,114 @@
   --ease-out: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+/* Colours follow Windows 11's Fluent design (the look of PowerToys and the
+   Settings app): a Mica-grey window, a lighter content layer laid over it,
+   and cards one step lighter again. */
 :root,
 [data-theme="light"] {
   color-scheme: light;
 
-  --bg: #ffffff;
-  --surface: #ffffff;
-  --surface-2: #f4f4f5;
-  --surface-3: #e9e9ec;
-  --surface-inset: #fafafa;
-  --sidebar: #f7f7f8;
+  --bg: #f9f9f9;
+  --surface: #fbfbfb;
+  --surface-2: #f3f3f3;
+  --surface-3: #ebebeb;
+  --surface-inset: #f6f6f6;
+  --sidebar: #f0f0f0;
 
-  --border: #e7e7ea;
-  --border-strong: #d3d3d8;
+  --border: #e5e5e5;
+  --border-strong: #d1d1d1;
+  --card-border: #e5e5e5;
 
-  --text-primary: #18181b;
-  --text-secondary: #6c6c75;
-  --text-muted: #84848e;
+  --text-primary: #1a1a1a;
+  --text-secondary: #5d5d5d;
+  --text-muted: #8a8a8a;
   --text-inverted: #ffffff;
 
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
-  --accent-active: #1a43bd;
-  --accent-ring: rgba(37, 99, 235, 0.20);
-  --accent-soft: #f0f0f2;
-  --accent-soft-hover: #e7e7ea;
+  --accent: #005fb8;
+  --accent-hover: #196ebf;
+  --accent-active: #3380c6;
+  --accent-ring: rgba(0, 95, 184, 0.22);
+  --accent-soft: rgba(0, 0, 0, 0.0373);
+  --accent-soft-hover: rgba(0, 0, 0, 0.0578);
   --accent-contrast: #ffffff;
-  --knob-off: #ffffff;
+  --knob-off: #5d5d5d;
   --raised: #ffffff;
 
-  --danger: #b42318;
-  --danger-hover: #912018;
-  --danger-soft: #fef3f2;
-  --success: #067647;
-  --success-soft: #ecfdf3;
-  --warning: #b54708;
-  --warning-soft: #fffaeb;
+  --danger: #c42b1c;
+  --danger-hover: #a52416;
+  --danger-soft: #fde7e9;
+  --danger-fill: #c42b1c;
+  --danger-fill-hover: #b0281a;
+  --success: #0f7b0f;
+  --success-soft: #dff6dd;
+  --warning: #9d5d00;
+  --warning-soft: #fff4ce;
 
-  --overlay: rgba(24, 24, 27, 0.32);
-  --shadow-sm: 0 1px 2px rgba(16, 16, 20, 0.05);
-  --shadow-md: 0 1px 3px rgba(16, 16, 20, 0.05), 0 6px 18px rgba(16, 16, 20, 0.06);
-  --shadow-lg: 0 2px 8px rgba(16, 16, 20, 0.06), 0 18px 44px rgba(16, 16, 20, 0.12);
+  --overlay: rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1), 0 32px 64px rgba(0, 0, 0, 0.18);
 
-  --selection: rgba(37, 99, 235, 0.16);
+  --selection: rgba(0, 95, 184, 0.18);
 
   /* The close button keeps Windows' own convention rather than Ampello's
      accent, because that is the one control everybody already knows. */
   --titlebar-close: #c42b1c;
   --titlebar-close-text: #ffffff;
-  --editor-gutter: #84848e;
-  --editor-active-line: rgba(37, 99, 235, 0.045);
+  --editor-gutter: #8a8a8a;
+  --editor-active-line: rgba(0, 95, 184, 0.045);
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #1c1c1f;
-  --surface: #242427;
-  --surface-2: #2e2e33;
-  --surface-3: #3a3a40;
-  --surface-inset: #18181a;
-  --sidebar: #161618;
+  --bg: #272727;
+  --surface: #2d2d2d;
+  --surface-2: #323232;
+  --surface-3: #3a3a3a;
+  --surface-inset: #1f1f1f;
+  --sidebar: #202020;
 
-  --border: #333338;
-  --border-strong: #48484f;
+  --border: #383838;
+  --border-strong: #4a4a4a;
+  --card-border: #1d1d1d;
 
-  --text-primary: #f4f4f5;
-  --text-secondary: #a9a9b2;
-  --text-muted: #86868f;
-  --text-inverted: #18181b;
+  --text-primary: #ffffff;
+  --text-secondary: #c5c5c5;
+  --text-muted: #9e9e9e;
+  --text-inverted: #1a1a1a;
 
-  --accent: #60a5fa;
-  --accent-hover: #7cb3fb;
-  --accent-active: #93c5fd;
-  --accent-ring: rgba(96, 165, 250, 0.26);
-  --accent-soft: #2e2e33;
-  --accent-soft-hover: #3a3a40;
-  --accent-contrast: #ffffff;
-  --knob-off: #c8c8cf;
-  --raised: #3f3f46;
+  --accent: #60cdff;
+  --accent-hover: #5bbae7;
+  --accent-active: #56a7ce;
+  --accent-ring: rgba(96, 205, 255, 0.26);
+  --accent-soft: rgba(255, 255, 255, 0.0605);
+  --accent-soft-hover: rgba(255, 255, 255, 0.0837);
+  --accent-contrast: #000000;
+  --knob-off: #c5c5c5;
+  --raised: #454545;
 
-  --danger: #f97066;
-  --danger-hover: #fda29b;
-  --danger-soft: #3a1b18;
-  --success: #47cd89;
-  --success-soft: #16281f;
-  --warning: #f5b544;
-  --warning-soft: #2e2411;
+  --danger: #ff99a4;
+  --danger-hover: #ffb3bb;
+  --danger-soft: #442726;
+  --danger-fill: #c42b1c;
+  --danger-fill-hover: #d13a2b;
+  --success: #6ccb5f;
+  --success-soft: #393d1b;
+  --warning: #fce100;
+  --warning-soft: #433519;
 
-  --overlay: rgba(0, 0, 0, 0.55);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.32), 0 8px 20px rgba(0, 0, 0, 0.34);
-  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.34), 0 20px 44px rgba(0, 0, 0, 0.46);
+  --overlay: rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.26), 0 8px 16px rgba(0, 0, 0, 0.26);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.26), 0 32px 64px rgba(0, 0, 0, 0.37);
 
-  --selection: rgba(96, 165, 250, 0.24);
+  --selection: rgba(96, 205, 255, 0.24);
 
-  --titlebar-close: #e81123;
+  --titlebar-close: #c42b1c;
   --titlebar-close-text: #ffffff;
-  --editor-gutter: #86868f;
-  --editor-active-line: rgba(96, 165, 250, 0.06);
+  --editor-gutter: #9e9e9e;
+  --editor-active-line: rgba(96, 205, 255, 0.06);
 }
 
 @theme inline {
@@ -125,6 +134,7 @@
 
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
+  --color-card-border: var(--card-border);
 
   --color-primary: var(--text-primary);
   --color-secondary: var(--text-secondary);
@@ -144,6 +154,8 @@
   --color-danger: var(--danger);
   --color-danger-hover: var(--danger-hover);
   --color-danger-soft: var(--danger-soft);
+  --color-danger-fill: var(--danger-fill);
+  --color-danger-fill-hover: var(--danger-fill-hover);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-warning: var(--warning);
@@ -152,16 +164,16 @@
   --color-titlebar-close: var(--titlebar-close);
   --color-titlebar-close-text: var(--titlebar-close-text);
 
-  --font-sans: "Inter", "Segoe UI Variable Text", "Segoe UI", -apple-system,
+  --font-sans: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", -apple-system,
     BlinkMacSystemFont, system-ui, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "Cascadia Code", "Cascadia Mono", ui-monospace, "SF Mono",
     "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
-  --radius-xs: 6px;
-  --radius-sm: 8px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
+  --radius-xs: 4px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
 
   --shadow-token-sm: var(--shadow-sm);
   --shadow-token-md: var(--shadow-md);
@@ -197,9 +209,9 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-    border-radius: 3px;
+    outline: 2px solid var(--text-primary);
+    outline-offset: 1px;
+    border-radius: 4px;
   }
 
   /* Ampello is a desktop app: no elastic overscroll, no text drag-select on chrome. */

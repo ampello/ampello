@@ -14,6 +14,7 @@ import type {
   Snippet,
   SnippetPatch,
   SnippetSummary,
+  UpdateInfo,
 } from "./types";
 
 // Every call into the Rust core goes through this module; nothing else imports
@@ -148,3 +149,10 @@ export const chooseSharedLibrary = () =>
 export const usePersonalLibrary = () => call<void>("use_personal_library");
 
 export const diagnostics = () => call<Diagnostics>("diagnostics");
+
+// The only call that reaches the network, and only when the user asks.
+export const checkForUpdate = () => call<UpdateInfo>("check_for_update");
+
+export const openDownloadPage = () => call<void>("open_download_page");
+
+export const appVersion = () => call<string>("app_version");

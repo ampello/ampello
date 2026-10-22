@@ -77,7 +77,7 @@ export type ResolvedTheme = "light" | "dark";
 
 export type BoundaryMode = "word" | "anywhere";
 
-export type InjectionMode = "auto" | "paste" | "type";
+export type InjectionMode = "paste" | "type";
 
 export type TypingSpeed = "fast" | "balanced" | "careful";
 
@@ -163,4 +163,10 @@ export interface DatabaseInfo {
   categoryCount: number;
   schemaVersion: number;
   sizeBytes: number;
+}
+
+export interface UpdateInfo {
+  current: string;
+  latest: string;
+  available: boolean;
 }

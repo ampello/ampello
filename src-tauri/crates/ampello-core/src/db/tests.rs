@@ -269,6 +269,40 @@ fn settings_default_then_persist() {
 }
 
 #[test]
+fn retired_auto_insertion_loads_as_paste() {
+    let db = db();
+    db.with(|conn| {
+        assert_eq!(settings::load(conn)?.injection_mode, "paste");
+
+        conn.execute(
+            "INSERT INTO settings (key, value) VALUES ('injection_mode', 'auto')",
+            [],
+        )?;
+        assert_eq!(settings::load(conn)?.injection_mode, "paste");
+
+        assert!(settings::apply(
+            conn,
+            settings::SettingsPatch {
+                injection_mode: Some("auto".into()),
+                ..Default::default()
+            }
+        )
+        .is_err());
+
+        let typed = settings::apply(
+            conn,
+            settings::SettingsPatch {
+                injection_mode: Some("type".into()),
+                ..Default::default()
+            },
+        )?;
+        assert_eq!(typed.injection_mode, "type");
+        Ok(())
+    })
+    .unwrap();
+}
+
+#[test]
 fn settings_reject_nonsense() {
     let db = db();
     db.with(|conn| {

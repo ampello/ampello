@@ -40,8 +40,6 @@ const KEY_DELETE: u16 = 51;
 
 const KEY_V: u16 = 9;
 
-const TYPEABLE_LIMIT: usize = 5_000;
-const AUTO_TYPE_LIMIT: usize = 24;
 const CANCELLED: &str = "cancelled";
 
 const PERMISSION_HELP: &str = "Ampello needs permission to watch and send keystrokes. Open \
@@ -683,16 +681,8 @@ fn keycode_of(key: CancelKey) -> u16 {
 
 // --- Delivering a payload --------------------------------------------------
 
-fn wants_paste(content: &str, config: Config) -> bool {
-    match config.injection {
-        InjectionMode::Paste => true,
-        InjectionMode::Type => false,
-        InjectionMode::Auto => {
-            content.chars().count() > AUTO_TYPE_LIMIT
-                || content.contains('\n')
-                || content.contains('\t')
-        }
-    }
+fn wants_paste(config: Config) -> bool {
+    config.injection == InjectionMode::Paste
 }
 
 fn text_settle(content: &str) -> u64 {
@@ -707,7 +697,7 @@ fn place_text(content: &str, config: Config, guard: &Guard) -> Result<(), String
     if content.is_empty() {
         return Ok(());
     }
-    if !wants_paste(content, config) {
+    if !wants_paste(config) {
         return type_text(content, guard);
     }
     guard.check()?;
@@ -756,7 +746,7 @@ fn deliver_payload(
     config: Config,
     guard: &Guard,
 ) -> Result<(), String> {
-    let needs_clipboard = !files.is_empty() || wants_paste(content, config);
+    let needs_clipboard = !files.is_empty() || wants_paste(config);
     if !needs_clipboard {
         return type_text(content, guard);
     }
@@ -773,12 +763,10 @@ fn deliver_payload(
         None
     };
 
-    if files.is_empty() {
-        if let Some(snapshot) = &snapshot {
-            if !snapshot.complete() && content.chars().count() <= TYPEABLE_LIMIT {
-                log::info!("clipboard holds content Ampello cannot restore; typing instead");
-                return type_text(content, guard);
-            }
+    // Paste was chosen, so paste; restore whatever of the clipboard we can.
+    if let Some(snapshot) = &snapshot {
+        if !snapshot.complete() {
+            log::info!("clipboard holds content Ampello cannot fully restore; pasting anyway");
         }
     }
 

@@ -63,7 +63,7 @@ export function AttachmentList({
     return (
       <section
         className={cn(
-          "mt-3 flex shrink-0 items-center gap-2 rounded-[12px] border border-dashed px-3 py-2",
+          "mt-3 flex shrink-0 items-center gap-2 rounded-[8px] border border-dashed px-3 py-2",
           dragging ? "border-border-strong bg-surface-2" : "border-border",
         )}
       >
@@ -119,7 +119,7 @@ export function AttachmentList({
 
           style={{ backgroundColor: "var(--overlay)" }}
         >
-          <div className="motion-pop flex flex-col items-center gap-2 rounded-[12px] border border-dashed border-accent bg-surface px-8 py-6 shadow-[var(--shadow-lg)]">
+          <div className="motion-pop flex flex-col items-center gap-2 rounded-[8px] border border-dashed border-accent bg-surface px-8 py-6 shadow-[var(--shadow-lg)]">
             <Upload size={22} strokeWidth={1.5} className="text-accent" />
             <p className="text-[13.5px] font-medium text-primary">
               Drop to attach to {snippet.trigger}
@@ -131,7 +131,7 @@ export function AttachmentList({
 
       <div
         className={cn(
-          "overflow-hidden rounded-[12px] border bg-surface transition-colors duration-150",
+          "overflow-hidden rounded-[8px] border bg-surface transition-colors duration-150",
           dragging ? "border-accent" : "border-border",
         )}
       >
@@ -142,7 +142,7 @@ export function AttachmentList({
             aria-controls={panelId}
             onClick={() => setOpen((value) => !value)}
             className={cn(
-              "flex h-7 min-w-0 flex-1 items-center gap-2 rounded-[8px] px-1.5 text-left",
+              "flex h-7 min-w-0 flex-1 items-center gap-2 rounded-[4px] px-1.5 text-left",
               "transition-colors duration-150 hover:bg-surface-2",
               "focus-visible:outline-2 focus-visible:outline-accent",
             )}
@@ -165,7 +165,7 @@ export function AttachmentList({
                 : `${attachments.length} file${attachments.length === 1 ? "" : "s"} · ${formatSize(totalBytes)}`}
             </span>
             {!open && attachments.length > 0 ? (
-              <span className="ml-1 flex min-w-0 items-center gap-1">
+              <span className="ml-1 flex min-w-0 items-center gap-1 overflow-hidden">
                 {attachments.slice(0, 4).map((attachment) => (
                   <Chip key={attachment.id} attachment={attachment} />
                 ))}
@@ -179,6 +179,8 @@ export function AttachmentList({
           </button>
 
           <Button
+            size="sm"
+            className="shrink-0"
             onClick={() => void run(() => ipc.pickAttachments(snippet.id), true)}
             disabled={busy}
           >
@@ -330,7 +332,7 @@ function Tile({
       )}
       <span
         className={cn(
-          "absolute left-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-[6px] px-1",
+          "absolute left-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-[4px] px-1",
           "text-[10px] font-semibold tabular-nums",
           image
             ? "bg-black/55 text-white backdrop-blur-[2px]"
@@ -342,7 +344,7 @@ function Tile({
 
       {!attachment.present ? (
         <span
-          className="absolute right-1 top-1 flex items-center gap-1 rounded-[6px] bg-danger-soft px-1 py-0.5 text-[9.5px] font-medium text-danger"
+          className="absolute right-1 top-1 flex items-center gap-1 rounded-[4px] bg-danger-soft px-1 py-0.5 text-[9.5px] font-medium text-danger"
           title="This file is no longer in Ampello's library and will be skipped."
         >
           <AlertTriangle size={9} strokeWidth={2.25} />
@@ -403,7 +405,7 @@ function TileButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "flex h-5 w-5 items-center justify-center rounded-[6px] transition-colors duration-150",
+        "flex h-5 w-5 items-center justify-center rounded-[4px] transition-colors duration-150",
         "text-secondary hover:bg-surface-3 hover:text-primary",
         "focus-visible:outline-2 focus-visible:outline-accent",
         "disabled:pointer-events-none disabled:opacity-35",

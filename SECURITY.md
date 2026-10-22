@@ -36,7 +36,9 @@ window change and shortcut. It is never written to disk.
 **What it never does.** Nothing you type is recorded, logged or transmitted.
 The log records what Ampello did, such as "expansion of snippet `<id>` failed",
 never what you typed and never a snippet's contents. There is no account, no sync,
-no telemetry and no network client of any kind.
+no telemetry. The one network request Ampello can make is the update check in
+Settings, sent only when you click it: a plain request for the latest release
+on GitHub that carries nothing about you or your snippets.
 
 **What is on disk.** Your snippet library is a plain, unencrypted SQLite file
 in your Windows user profile, with attachments beside it. It is protected by

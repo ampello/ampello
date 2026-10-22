@@ -295,7 +295,7 @@ export function EditorView({
                 setCategoryId(event.target.value || null);
                 markFields();
               }}
-              className="h-8 w-full rounded-[8px] border border-border bg-surface px-2 text-[13px] text-primary focus:border-accent focus:outline-none"
+              className="h-8 w-full rounded-[4px] border border-border border-b-border-strong bg-surface px-2 text-[13px] text-primary focus:border-accent focus:outline-none"
             >
               <option value="">None</option>
               {categories.map((category) => (
@@ -377,7 +377,7 @@ function Field({
 }) {
   return (
     <div className={className}>
-      <label className="mb-1 block text-[11px] font-medium uppercase tracking-[0.06em] text-muted">
+      <label className="mb-1 block text-[13px] text-primary">
         {label}
       </label>
       {children}

@@ -6,6 +6,7 @@ pub mod library;
 pub mod shortcut;
 pub mod state;
 pub mod tray;
+pub mod update;
 pub mod window;
 
 use std::sync::Arc;
@@ -187,6 +188,9 @@ pub fn run() {
             commands::choose_shared_library,
             commands::use_personal_library,
             commands::diagnostics,
+            update::check_for_update,
+            update::open_download_page,
+            update::app_version,
         ])
         .build(tauri::generate_context!())
         .expect("Ampello failed to start")

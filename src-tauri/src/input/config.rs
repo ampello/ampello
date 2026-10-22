@@ -3,7 +3,6 @@ use ampello_core::CancelKey;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InjectionMode {
-    Auto,
     Paste,
     Type,
 }
@@ -11,9 +10,8 @@ pub enum InjectionMode {
 impl InjectionMode {
     pub fn parse(value: &str) -> Self {
         match value {
-            "paste" => InjectionMode::Paste,
             "type" => InjectionMode::Type,
-            _ => InjectionMode::Auto,
+            _ => InjectionMode::Paste,
         }
     }
 }
@@ -76,7 +74,7 @@ impl Default for Config {
         Self {
             preserve_terminator: true,
             restore_clipboard: true,
-            injection: InjectionMode::Auto,
+            injection: InjectionMode::Paste,
             typing: TypingSpeed::Balanced,
             clipboard: ClipboardMode::Type,
             attachment_settle_ms: 500,

@@ -71,7 +71,7 @@ export function DashboardView() {
     <>
       <TopBar title="Home" />
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-[840px] px-8 py-9">
+        <div className="w-full max-w-[1000px] px-8 pb-10 pt-2">
           <StatusCard
             engine={engine}
             enabled={settings.expansionEnabled}
@@ -152,7 +152,7 @@ function StatusCard({
   }
 
   return (
-    <section className="divide-y divide-border overflow-hidden rounded-[12px] border border-border bg-surface">
+    <section className="divide-y divide-border overflow-hidden rounded-[8px] border border-card-border bg-surface">
       <div
         className={cn(
           "flex items-center gap-3 px-4 py-3.5",
@@ -228,10 +228,10 @@ function SnippetCard({
 }) {
   return (
     <section>
-      <h3 className="mb-2 px-1 text-[11px] font-medium uppercase tracking-[0.06em] text-muted">
+      <h3 className="mb-2 text-[14px] font-semibold text-primary">
         {title}
       </h3>
-      <div className="overflow-hidden rounded-[12px] border border-border bg-surface">
+      <div className="overflow-hidden rounded-[8px] border border-card-border bg-surface">
         {snippets.length === 0 ? (
           <p className="px-4 py-3.5 text-[12.5px] leading-relaxed text-muted">{empty}</p>
         ) : (
@@ -273,10 +273,10 @@ function SnippetCard({
 function GettingStarted({ onCreate }: { onCreate: () => void }) {
   return (
     <section className="mt-7">
-      <h3 className="mb-2 px-1 text-[11px] font-medium uppercase tracking-[0.06em] text-muted">
+      <h3 className="mb-2 text-[14px] font-semibold text-primary">
         Getting started
       </h3>
-      <div className="divide-y divide-border overflow-hidden rounded-[12px] border border-border bg-surface">
+      <div className="divide-y divide-border overflow-hidden rounded-[8px] border border-card-border bg-surface">
         <Step
           number={1}
           title="Write a snippet"
