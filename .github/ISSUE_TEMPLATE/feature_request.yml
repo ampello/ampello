@@ -1,0 +1,11 @@
+name: Feature request
+description: Suggest an idea for Ampello
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would you like Ampello to do?
+      description: Describe the problem you are trying to solve.
+    validations:
+      required: true
