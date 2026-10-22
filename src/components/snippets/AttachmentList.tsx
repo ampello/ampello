@@ -165,7 +165,7 @@ export function AttachmentList({
                 : `${attachments.length} file${attachments.length === 1 ? "" : "s"} · ${formatSize(totalBytes)}`}
             </span>
             {!open && attachments.length > 0 ? (
-              <span className="ml-1 flex min-w-0 items-center gap-1">
+              <span className="ml-1 flex min-w-0 items-center gap-1 overflow-hidden">
                 {attachments.slice(0, 4).map((attachment) => (
                   <Chip key={attachment.id} attachment={attachment} />
                 ))}
@@ -179,6 +179,8 @@ export function AttachmentList({
           </button>
 
           <Button
+            size="sm"
+            className="shrink-0"
             onClick={() => void run(() => ipc.pickAttachments(snippet.id), true)}
             disabled={busy}
           >

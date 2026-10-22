@@ -30,7 +30,7 @@ const variants: Record<Variant, string> = {
   ghost:
     "text-primary hover:bg-accent-soft active:bg-accent-soft-hover",
   danger:
-    "bg-danger text-white border border-black/10 border-b-black/25 hover:bg-danger-hover",
+    "bg-danger-fill text-white border border-black/10 border-b-black/25 hover:bg-danger-fill-hover",
 };
 
 const sizes: Record<Size, string> = {
