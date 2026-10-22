@@ -164,3 +164,9 @@ export interface DatabaseInfo {
   schemaVersion: number;
   sizeBytes: number;
 }
+
+export interface UpdateInfo {
+  current: string;
+  latest: string;
+  available: boolean;
+}

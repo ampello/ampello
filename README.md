@@ -60,7 +60,8 @@ Trigger      Expansion
   reformat a standard paste.
 * **Local storage only.** Data is held in a single SQLite database on the local
   machine. Ampello has no account system, no synchronisation service and no
-  network client.
+  telemetry. Its only network request is the optional update check, made
+  when you click *Check for updates* in Settings.
 * **Optional shared libraries.** Accounts on the same machine may opt in to a
   common snippet directory. Libraries are private to each account by default.
 * **Portable backups.** Exports are plain YAML, suitable for version control
